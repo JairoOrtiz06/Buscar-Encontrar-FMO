@@ -16,6 +16,7 @@ export const dbPromise = openDB('encuentraUES', 1, {
                 autoIncrement: true
             });
         }
+        
 
         if (!db.objectStoreNames.contains('reclamos')) {
             db.createObjectStore('reclamos', {
