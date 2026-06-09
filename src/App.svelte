@@ -1,5 +1,5 @@
 <script>
-    import PublicarObjeto from './paginas/PublicarObjeto.svelte';
+    import VerHistorial from './paginas/VerHistorial.svelte';
 </script>
 
-<PublicarObjeto />
+<VerHistorial />

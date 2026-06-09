@@ -161,3 +161,32 @@ export async function getEstadisticas() {
         archivado: objetos.filter(o => o.estado === 'archivado').length
     };
 }
+
+
+// HISTORIAL - Ver publicaciones del usuario    
+// Obtener historial de un usuario específico
+export async function getHistorialUsuario(idUsuario) {
+    const db = await dbPromise;
+    const objetos = await db.getAll('objetos');
+    return objetos
+        .filter(o => o.idUsuario === idUsuario && o.estado !== 'eliminado')
+        .sort((a, b) => new Date(b.fechaPublicacion) - new Date(a.fechaPublicacion));
+}
+
+// Obtener historial filtrado por estado
+export async function getHistorialPorEstado(idUsuario, estado) {
+    const db = await dbPromise;
+    const objetos = await db.getAll('objetos');
+    return objetos
+        .filter(o => o.idUsuario === idUsuario && o.estado === estado)
+        .sort((a, b) => new Date(b.fechaPublicacion) - new Date(a.fechaPublicacion));
+}
+
+// Obtener todos los objetos eliminados del usuario
+export async function getEliminados(idUsuario) {
+    const db = await dbPromise;
+    const objetos = await db.getAll('objetos');
+    return objetos
+        .filter(o => o.idUsuario === idUsuario && o.estado === 'eliminado')
+        .sort((a, b) => new Date(b.fechaPublicacion) - new Date(a.fechaPublicacion));
+}
