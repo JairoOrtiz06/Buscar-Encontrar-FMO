@@ -6,23 +6,26 @@
         { id: 2, nombre: "Ana Martínez", correo: "amartinez@ues.edu.sv", carnet: "SM23002", fotoCarnet: "/usuario.png" }
     ];
     let usuariosAprobados = [
-    {
-        id: 101,
-        nombre: "Carlos Gómez",
-        correo: "cgomez@ues.edu.sv",
-        carnet: "SM22001",
-        estado: "Activo"
-    },
-    {
-        id: 102,
-        nombre: "María Pérez",
-        correo: "mperez@ues.edu.sv",
-        carnet: "SM22002",
-        estado: "Activo"
-    }
-];
+        {
+            id: 101,
+            nombre: "Carlos Gómez",
+            correo: "cgomez@ues.edu.sv",
+            carnet: "SM22001",
+            estado: "Activo"
+        },
+        {
+            id: 102,
+            nombre: "María Pérez",
+            correo: "mperez@ues.edu.sv",
+            carnet: "SM22002",
+            estado: "Activo"
+        }
+    
+    ];
+    let mostrarEditar = false;
+    let usuarioEditando: any = null;
 
-let busqueda = "";
+    let busqueda = "";
 
     let imagenSeleccionada = "";
     let notificacion = "";
@@ -54,56 +57,77 @@ let busqueda = "";
     }
 }
 
-function rechazarUsuario(id: number) {
-    usuariosPendientes =
-        usuariosPendientes.filter(
-            usuario => usuario.id !== id
+    function rechazarUsuario(id: number) {
+        usuariosPendientes =
+            usuariosPendientes.filter(
+                usuario => usuario.id !== id
+            );
+
+        mostrarNotificacion("❌ Usuario rechazado");
+    }
+
+    function mostrarNotificacion(mensaje: string) {
+        notificacion = mensaje;
+
+        setTimeout(() => {
+            notificacion = "";
+        }, 3000);
+    }
+
+    function desactivarUsuario(id:number) {
+
+        usuariosAprobados =
+            usuariosAprobados.map(usuario => {
+
+                if (usuario.id === id) {
+
+                    return {
+                        ...usuario,
+                        estado:
+                            usuario.estado === "Activo"
+                                ? "Inactivo"
+                                : "Activo"
+                    };
+                }
+
+                return usuario;
+            });
+
+        mostrarNotificacion(
+            "🔄 Estado actualizado"
         );
+    }
 
-    mostrarNotificacion("❌ Usuario rechazado");
-}
+    function eliminarUsuario(id: number) {
 
-function mostrarNotificacion(mensaje: string) {
-    notificacion = mensaje;
+        usuariosAprobados =
+            usuariosAprobados.filter(
+                usuario => usuario.id !== id
+            );
 
-    setTimeout(() => {
-        notificacion = "";
-    }, 3000);
-}
+        mostrarNotificacion(
+            "🗑️ Usuario eliminado"
+        );
+    }
+    function editarUsuario(usuario: any) {
+    usuarioEditando = { ...usuario };
+    mostrarEditar = true;}
 
-function desactivarUsuario(id:number) {
+    function guardarEdicion() {
 
     usuariosAprobados =
-        usuariosAprobados.map(usuario => {
+        usuariosAprobados.map(usuario =>
 
-            if (usuario.id === id) {
+            usuario.id === usuarioEditando.id
+                ? usuarioEditando
+                : usuario
 
-                return {
-                    ...usuario,
-                    estado:
-                        usuario.estado === "Activo"
-                            ? "Inactivo"
-                            : "Activo"
-                };
-            }
-
-            return usuario;
-        });
-
-    mostrarNotificacion(
-        "🔄 Estado actualizado"
-    );
-}
-
-function eliminarUsuario(id: number) {
-
-    usuariosAprobados =
-        usuariosAprobados.filter(
-            usuario => usuario.id !== id
         );
 
+    mostrarEditar = false;
+
     mostrarNotificacion(
-        "🗑️ Usuario eliminado"
+        "✏️ Usuario actualizado"
     );
 }
 </script>
@@ -149,6 +173,47 @@ function eliminarUsuario(id: number) {
             <img src={imagenSeleccionada} alt="Seleccionada" />
         </div>
     </div>
+{/if}
+
+{#if mostrarEditar}
+
+<div class="modal-overlay">
+
+    <div class="modal-content">
+
+        <h2>Editar Usuario</h2>
+
+        <label>Nombre</label>
+        <input bind:value={usuarioEditando.nombre}>
+
+        <label>Correo</label>
+        <input bind:value={usuarioEditando.correo}>
+
+        <label>Carnet</label>
+        <input bind:value={usuarioEditando.carnet}>
+
+        <div class="acciones">
+
+            <button
+                class="aprobar"
+                on:click={guardarEdicion}
+            >
+                Guardar
+            </button>
+
+            <button
+                class="rechazar"
+                on:click={() => mostrarEditar = false}
+            >
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 {/if}
 
 <hr>
@@ -222,6 +287,11 @@ function eliminarUsuario(id: number) {
 
             Eliminar
 
+        </button>
+        <button
+            class="editar"
+            on:click={() => editarUsuario(usuario)}>
+            ✏️ Editar
         </button>
 
     </div>
@@ -320,5 +390,9 @@ function eliminarUsuario(id: number) {
     .inactivo {
         color: red;
         font-weight: bold;
+    }
+    .editar {
+        background: #3b82f6;
+        color: white;
     }
 </style>

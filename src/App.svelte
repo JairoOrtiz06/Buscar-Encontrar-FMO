@@ -1,6 +1,7 @@
 <script>
-    import Login from './paginas/Administracion.svelte';
+    import Administracion from './paginas/Administracion.svelte';
 
+    /*
     import { dbPromise } from './base_datos/database.js';
 
     async function probarBD() {
@@ -9,7 +10,8 @@
     }
 
     probarBD();
+    import VerHistorial from './paginas/VerHistorial.svelte';*/
 </script>
 
+<Administracion />
 
-<Login />
