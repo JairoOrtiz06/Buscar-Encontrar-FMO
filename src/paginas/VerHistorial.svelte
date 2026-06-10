@@ -1,4 +1,4 @@
-<script>
+<script >
     import { onMount } from 'svelte';
     import { getHistorialUsuario, actualizarEstado, eliminarObjeto, restaurarObjeto } from '../crud/objetos.js';
     
