@@ -1,5 +1,5 @@
 <script>
-    import VerHistorial from './paginas/VerHistorial.svelte';
+    import Inicio from './paginas/Inicio.svelte';
 </script>
 
-<VerHistorial />
+<Inicio />
