@@ -40,5 +40,78 @@
                 r => r.id !== id
             );
     }
+    }
+    function rechazarReclamo(id: number) {
+
+    reclamosPendientes =
+        reclamosPendientes.filter(
+            r => r.id !== id
+        );
 }
 </script>
+<h2>📋 Reclamos Pendientes</h2>
+
+{#each reclamosPendientes as reclamo}
+
+<div class="card">
+
+    <h3>{reclamo.objeto}</h3>
+
+    <p>
+        <strong>Solicitante:</strong>
+        {reclamo.solicitante}
+    </p>
+
+    <p>
+        <strong>Correo:</strong>
+        {reclamo.correo}
+    </p>
+
+    <p>
+        <strong>Descripción:</strong>
+        {reclamo.descripcion}
+    </p>
+
+    <p>
+        <strong>Fecha:</strong>
+        {reclamo.fecha}
+    </p>
+
+    <div class="acciones">
+
+        <button
+            class="aprobar"
+            on:click={() =>
+                aprobarReclamo(reclamo.id)}>
+            Aprobar
+        </button>
+
+        <button
+            class="rechazar"
+            on:click={() =>
+                rechazarReclamo(reclamo.id)}>
+            Rechazar
+        </button>
+
+    </div>
+
+</div>
+
+{/each}
+<h2>✅ Reclamos Aprobados</h2>
+
+{#each reclamosAprobados as reclamo}
+
+<div class="card">
+
+    <h3>{reclamo.objeto}</h3>
+
+    <p>{reclamo.solicitante}</p>
+
+    <p class="estado-aprobado">
+        Entrega Autorizada
+    </p>
+
+</div>
+
+{/each}
