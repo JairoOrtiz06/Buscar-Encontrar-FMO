@@ -1,32 +1,76 @@
 <script>
+    import { dbPromise } from '../base_datos/database.js';
+
     export let objeto = {
-        nombre: "",
+        id: null,
+        titulo: "",
         categoria: "",
         ubicacion: "",
-        fechaHallazgo: ""
+        fechaPublicacion: "",
+        foto: ""
     };
+
+    export let volver = () => {};
 
     let motivo = "";
     let descripcion = "";
     let contacto = "";
 
-    function enviarReclamo() {
-        alert("Reclamo enviado correctamente");
+    async function enviarReclamo() {
+        try {
+            const db = await dbPromise;
+
+            await db.add('reclamos', {
+                idObjeto: objeto.id,
+                idSolicitante: null,
+                motivo,
+                descripcion,
+                contacto,
+                estado: 'pendiente',
+                fechaSolicitud: new Date().toISOString()
+            });
+
+            alert("Reclamo enviado correctamente");
+
+            motivo = "";
+            descripcion = "";
+            contacto = "";
+
+            volver();
+
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar el reclamo");
+        }
     }
 </script>
+
+<div class="contenedor-volver">
+    <button class="btn-volver" on:click={volver}>
+        ← Volver
+    </button>
+</div>
 
 <h1>Solicitar Reclamo</h1>
 
 <div class="contenedor">
-
     <div class="card">
 
         <h2>Información del Objeto</h2>
 
         <div class="info-objeto">
+
+            {#if objeto.foto}
+                <img
+                    src={objeto.foto}
+                    alt={objeto.titulo}
+                    class="imagen-objeto"
+                />
+            {/if}
+
             <p>
                 <strong>Objeto:</strong>
-                {objeto.nombre}
+                {objeto.titulo}
             </p>
 
             <p>
@@ -41,34 +85,41 @@
 
             <p>
                 <strong>Fecha:</strong>
-                {objeto.fechaHallazgo}
+                {objeto.fechaPublicacion
+                    ? new Date(objeto.fechaPublicacion).toLocaleDateString()
+                    : ""}
             </p>
+
         </div>
 
-        <label>Motivo del reclamo</label>
+        <label for="motivo">Motivo del reclamo</label>
 
         <input
+            id="motivo"
             type="text"
             bind:value={motivo}
             placeholder="Ejemplo: El objeto me pertenece"
         />
 
-        <label>Descripción</label>
+        <label for="descripcion">Descripción</label>
 
         <textarea
+            id="descripcion"
             bind:value={descripcion}
             placeholder="Describe características del objeto para verificar que es tuyo"
         ></textarea>
 
-        <label>Teléfono o correo electrónico</label>
+        <label for="contacto">Teléfono o correo electrónico</label>
 
         <input
+            id="contacto"
             type="text"
             bind:value={contacto}
             placeholder="Ingrese un medio de contacto"
         />
 
         <button
+            class="btn-enviar"
             on:click={enviarReclamo}
             disabled={!motivo || !descripcion || !contacto}
         >
@@ -76,10 +127,31 @@
         </button>
 
     </div>
-
 </div>
 
 <style>
+    .contenedor-volver {
+        padding: 20px;
+    }
+
+    .btn-volver {
+        width: auto;
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #374151;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-volver:hover {
+        background: #4b5563;
+    }
+
     h1 {
         text-align: center;
         color: white;
@@ -118,6 +190,15 @@
         margin-bottom: 30px;
     }
 
+    .imagen-objeto {
+        width: 250px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 10px;
+        display: block;
+        margin: 0 auto 20px auto;
+    }
+
     .info-objeto p {
         text-align: center;
         margin: 12px 0;
@@ -143,7 +224,6 @@
         color: white;
         font-size: 16px;
         box-sizing: border-box;
-        transition: 0.3s;
     }
 
     input:focus,
@@ -158,7 +238,7 @@
         resize: vertical;
     }
 
-    button {
+    .btn-enviar {
         width: 100%;
         margin-top: 25px;
         padding: 15px;
@@ -172,12 +252,12 @@
         transition: 0.3s;
     }
 
-    button:hover:not(:disabled) {
+    .btn-enviar:hover:not(:disabled) {
         background: #1d4ed8;
         transform: translateY(-2px);
     }
 
-    button:disabled {
+    .btn-enviar:disabled {
         background: #6b7280;
         cursor: not-allowed;
     }
@@ -190,6 +270,11 @@
 
         h1 {
             font-size: 2.2rem;
+        }
+
+        .imagen-objeto {
+            width: 100%;
+            height: auto;
         }
     }
 </style>
