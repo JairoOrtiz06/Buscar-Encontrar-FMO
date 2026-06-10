@@ -133,7 +133,8 @@
     
     <div class="cta">
         <p>¿Ya tienes cuenta?</p>
-        <div class="btns"><button on:click={irLogin}>Login</button><button on:click={irRegistro}>Registrarse</button></div>
+        <div class="btns">
+        <button on:click={irLogin}>Login</button><button on:click={irRegistro}>Registrarse</button></div>
     </div>
 </div>
 
