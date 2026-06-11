@@ -364,18 +364,6 @@
               <p>Coordina la entrega con quien lo encontro</p>
             </div>
           </div>
-
-          <!-- Estadísticas -->
-          <div class="estadisticas">
-            <div class="stat">
-              <span class="numero-stat">500+</span>
-              <span class="etiqueta-stat">Usuarios</span>
-            </div>
-            <div class="stat">
-              <span class="numero-stat">150+</span>
-              <span class="etiqueta-stat">Objetos Encontrados</span>
-            </div>
-          </div>
         </div>
       </aside>
     </div>
@@ -800,33 +788,6 @@
     font-size: 0.9rem;
     opacity: 0.9;
     text-align: center;
-  }
-
-  /* ESTADÍSTICAS */
-  .estadisticas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .numero-stat {
-    display: block;
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .etiqueta-stat {
-    display: block;
-    font-size: 0.85rem;
-    opacity: 0.9;
   }
 
   /* ========================================
