@@ -3,7 +3,7 @@
 
     let usuariosPendientes = [
         { id: 1, nombre: "Juan Pérez", correo: "jperez@ues.edu.sv", carnet: "SM23001", fotoCarnet: "/carnet.jpeg" },
-        { id: 2, nombre: "Ana Martínez", correo: "amartinez@ues.edu.sv", carnet: "SM23002", fotoCarnet: "/carnet.jpeg" }
+        { id: 2, nombre: "Ana Martínez", correo: "amartinez@ues.edu.sv", carnet: "SM23002", fotoCarnet: "/svelte.svg" }
     ];
     let usuariosAprobados = [
         {
