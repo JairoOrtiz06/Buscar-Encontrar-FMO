@@ -195,7 +195,7 @@
      ======================================== -->
 
 <main class="contenedor-login">
-  <!-- ENCABEZADO: Logo y Título -->
+  <!-- COLUMNA 1: Logo y Título -->
   <header class="encabezado-login">
     <div class="logo-contenedor">
       <img src={logoUES} alt="Logo UES-FMO" class="logo-ues" />
@@ -204,7 +204,7 @@
     <p class="subtitulo">Sistema de Objetos Perdidos y Encontrados</p>
   </header>
 
-  <!-- SECCIÓN PRINCIPAL: Tarjeta de login -->
+  <!-- COLUMNA 2: Tarjeta de login -->
   <section class="seccion-login">
     <div class="tarjeta-login">
       <!-- COLUMNA 1: Formulario de login -->
@@ -332,40 +332,6 @@
           <button type="button" class="enlace-pequeño">Olvidaste tu contraseña?</button>
         </div>
       </div>
-
-      <!-- COLUMNA 2: Panel informativo (solo desktop) -->
-      <aside class="panel-informativo">
-        <div class="contenido-informativo">
-          <h3>Como funciona?</h3>
-          
-          <!-- Paso 1 -->
-          <div class="paso-info">
-            <span class="numero-paso">1</span>
-            <div>
-              <h4>Reporta Objetos</h4>
-              <p>Si encuentras algo, registralo en el sistema</p>
-            </div>
-          </div>
-
-          <!-- Paso 2 -->
-          <div class="paso-info">
-            <span class="numero-paso">2</span>
-            <div>
-              <h4>Busca tu Objeto</h4>
-              <p>Consulta si alguien lo encontro</p>
-            </div>
-          </div>
-
-          <!-- Paso 3 -->
-          <div class="paso-info">
-            <span class="numero-paso">3</span>
-            <div>
-              <h4>Reclama tu Articulo</h4>
-              <p>Coordina la entrega con quien lo encontro</p>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
   </section>
 </main>
@@ -395,57 +361,60 @@
 
   /* LOGO */
   .logo-contenedor {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.1rem;
     animation: deslizarAbajo 0.6s ease-out;
   }
 
   .logo-ues {
-    height: 80px;
+    height: 120px;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     border: 3px solid white;
     border-radius: 8px;
-    padding: 5px;
+    padding: 8px;
     background: white;
   }
 
   /* CONTENEDOR PRINCIPAL */
   .contenedor-login {
-    min-height: 100vh;
     background: linear-gradient(135deg, #C41E3A 0%, #E01D3A 50%, #A01B2F 100%);
-    display: flex;
-    flex-direction: column;
-    padding: 2rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1rem;
+    align-items: center;
   }
 
   /* ENCABEZADO */
   .encabezado-login {
     text-align: center;
     color: white;
-    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     animation: deslizarAbajo 0.6s ease-out;
   }
 
   .encabezado-login h1 {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 700;
-    margin: 0;
+    margin: 1rem 0 0 0;
     letter-spacing: 2px;
     color: #FFFFFF;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .subtitulo {
-    font-size: 1rem;
-    opacity: 0.9;
+    font-size: 1.2rem;
+    opacity: 0.95;
     margin: 0.5rem 0 0 0;
     font-weight: 300;
   }
 
   /* SECCIÓN PRINCIPAL */
   .seccion-login {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -459,36 +428,34 @@
     border-top: 5px solid #C41E3A;
     overflow: hidden;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     width: 100%;
-    max-width: 1000px;
+    max-width: 600px;
     animation: aparecer 0.8s ease-out;
   }
 
   /* CONTENIDO FORMULARIO */
   .contenido-tarjeta {
-    padding: 3rem 2rem;
+    padding: 1.2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.8rem;
   }
 
   /* ENCABEZADO TARJETA */
   .encabezado-tarjeta {
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .encabezado-tarjeta h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     color: var(--texto);
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.25rem 0;
   }
 
   .descripcion {
-    color: var(--texto-secundario);
-    font-size: 0.95rem;
-    margin: 0;
+    font-size: 0.85rem;
   }
 
   /* ALERTA DE ERROR */
@@ -516,22 +483,22 @@
   form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   /* CAMPO FORMULARIO */
   .campo-formulario {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.3rem;
   }
 
   /* ETIQUETA */
   .etiqueta {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--texto);
-    display: block;
+    display:flex;
   }
 
   .etiqueta-con-toggle {
@@ -629,12 +596,12 @@
 
   /* BOTÓN LOGIN (PRIMARIO) */
   .boton-login {
-    padding: 1rem;
+    padding: 0.8rem;
     background: linear-gradient(135deg, #C41E3A 0%, #A01B2F 100%);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
@@ -642,7 +609,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 
   .boton-login:hover:not(:disabled) {
@@ -671,9 +638,9 @@
   .divisor {
     text-align: center;
     color: var(--texto-secundario);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     position: relative;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
   }
 
   .divisor span {
@@ -730,64 +697,6 @@
   .enlace-pequeño:hover {
     color: var(--primario-oscuro);
     text-decoration: underline;
-  }
-
-  /* PANEL INFORMATIVO (COLUMNA 2) */
-  .panel-informativo {
-    background: linear-gradient(135deg, #C41E3A 0%, #A01B2F 100%);
-    color: white;
-    padding: 3rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .contenido-informativo h3 {
-    font-size: 1.5rem;
-    margin: 0 0 2rem 0;
-    text-align: center;
-  }
-
-  /* PASOS */
-  .paso-info {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .paso-info > div {
-    width: 100%;
-    text-align: left;
-  }
-
-  .numero-paso {
-    min-width: 40px;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    flex-shrink: 0;
-    font-size: 1.1rem;
-  }
-
-  .paso-info h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .paso-info p {
-    margin: 0;
-    font-size: 0.9rem;
-    opacity: 0.9;
-    text-align: center;
   }
 
   /* ========================================
@@ -849,16 +758,18 @@
 
   /* Tablet y pantallas medianas */
   @media (max-width: 768px) {
+    .contenedor-login {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
     .encabezado-login h1 {
       font-size: 1.75rem;
     }
 
     .tarjeta-login {
-      grid-template-columns: 1fr;
-    }
-
-    .panel-informativo {
-      display: none;
+      max-width: 100%;
     }
 
     .contenido-tarjeta {
