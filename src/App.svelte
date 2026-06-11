@@ -98,10 +98,6 @@
     margin: 0;
   }
 
-  :global(input[type=number]) {
-    -moz-appearance: textfield;
-  }
-
   /* Estilos para links */
   :global(a) {
     color: #0066cc;
