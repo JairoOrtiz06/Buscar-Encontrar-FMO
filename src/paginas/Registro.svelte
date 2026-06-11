@@ -35,6 +35,10 @@
   // IMPORTACIONES
   // ========================================
   
+  // Importar logo
+  import logoUES from '../assets/logoUES.png';
+
+
   import { onMount } from 'svelte';
   
   // Servicio de registro con validaciones de duplicados
@@ -302,6 +306,9 @@
 {#if pasoActual === 1}
   <main class="contenedor-registro">
     <header class="encabezado-registro">
+      <div class="logo-contenedor">
+        <img src={logoUES} alt="Logo UES-FMO" class="logo-ues" />
+      </div>
       <h1>Encuentra UES-FMO</h1>
       <p class="subtitulo">Crear una nueva cuenta</p>
     </header>
@@ -747,23 +754,39 @@
 <style>
   /* Variables CSS */
   :global(:root) {
-    --primario: #0066cc;
-    --primario-oscuro: #0052a3;
-    --primario-claro: #f0f6ff;
-    --error: #d32f2f;
-    --fondo: #f8f9fa;
-    --borde: #dee2e6;
-    --texto: #212529;
-    --texto-secundario: #6c757d;
-    --exito: #06a77d;
-    --sombra-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+    --primario: #0088CC;
+    --primario-oscuro: #006BA3;
+    --primario-claro: #E8F4FF;
+    --secundario: #C41E3A;
+    --secundario-claro: #F5E8EB;
+    --error: #C41E3A;
+    --exito: #28a745;
+    --fondo: #F5F5F5;
+    --borde: #D0D0D0;
+    --texto: #333333;
+    --texto-secundario: #666666;
+    --blanco: #FFFFFF;
+    --sombra-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --sombra-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* LOGO */
+  .logo-contenedor {
+    margin-bottom: 1.5rem;
+    animation: deslizarAbajo 0.6s ease-out;
+  }
+
+  .logo-ues {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 
   /* CONTENEDOR PRINCIPAL */
   .contenedor-registro {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #C41E3A 0%, #E01D3A 50%, #A01B2F 100%);
     display: flex;
     flex-direction: column;
     padding: 2rem 1rem;
@@ -782,6 +805,8 @@
     font-weight: 700;
     margin: 0;
     letter-spacing: 2px;
+    color: #FFFFFF;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .subtitulo {
@@ -889,6 +914,7 @@
     background: white;
     border-radius: 16px;
     box-shadow: var(--sombra-lg);
+    border-top: 5px solid #C41E3A;
     padding: 3rem 2rem;
     width: 100%;
     max-width: 800px;

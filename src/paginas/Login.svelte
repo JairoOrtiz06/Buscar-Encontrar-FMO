@@ -63,6 +63,7 @@
     obtenerFortaleaContrasena
   } from '../utilidades/validaciones.js';
 
+  import logoUES from '../assets/logoUES.png';
   import { irA } from '../stores/navegacionStore.js';
 
   // ========================================
@@ -194,8 +195,11 @@
      ======================================== -->
 
 <main class="contenedor-login">
-  <!-- ENCABEZADO: Título y subtítulo -->
+  <!-- ENCABEZADO: Logo y Título -->
   <header class="encabezado-login">
+    <div class="logo-contenedor">
+      <img src={logoUES} alt="Logo UES-FMO" class="logo-ues" />
+    </div>
     <h1>Encuentra UES-FMO</h1>
     <p class="subtitulo">Sistema de Objetos Perdidos y Encontrados</p>
   </header>
@@ -385,22 +389,43 @@
 <style>
   /* Variables CSS para consistencia de diseño */
   :global(:root) {
-    --primario: #0066cc;
-    --primario-oscuro: #0052a3;
-    --primario-claro: #f0f6ff;
-    --error: #d32f2f;
-    --fondo: #f8f9fa;
-    --borde: #dee2e6;
-    --texto: #212529;
-    --texto-secundario: #6c757d;
-    --sombra-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+    --primario: #C41E3A;
+    --primario-oscuro: #A01B2F;
+    --primario-claro: #F5E8EB;
+    --secundario: #0088CC;
+    --secundario-claro: #E8F4FF;
+    --error: #C41E3A;
+    --exito: #28a745;
+    --fondo: #FFFFFF;
+    --borde: #E0E0E0;
+    --texto: #333333;
+    --texto-secundario: #666666;
+    --blanco: #FFFFFF;
+    --sombra-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --sombra-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* LOGO */
+  .logo-contenedor {
+    margin-bottom: 1.5rem;
+    animation: deslizarAbajo 0.6s ease-out;
+  }
+
+  .logo-ues {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    border: 3px solid white;
+    border-radius: 8px;
+    padding: 5px;
+    background: white;
   }
 
   /* CONTENEDOR PRINCIPAL */
   .contenedor-login {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #C41E3A 0%, #E01D3A 50%, #A01B2F 100%);
     display: flex;
     flex-direction: column;
     padding: 2rem 1rem;
@@ -419,6 +444,8 @@
     font-weight: 700;
     margin: 0;
     letter-spacing: 2px;
+    color: #FFFFFF;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .subtitulo {
@@ -441,6 +468,7 @@
     background: white;
     border-radius: 16px;
     box-shadow: var(--sombra-lg);
+    border-top: 5px solid #C41E3A;
     overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -614,7 +642,7 @@
   /* BOTÓN LOGIN (PRIMARIO) */
   .boton-login {
     padding: 1rem;
-    background: linear-gradient(135deg, var(--primario) 0%, #0052a3 100%);
+    background: linear-gradient(135deg, #C41E3A 0%, #A01B2F 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -630,6 +658,7 @@
   }
 
   .boton-login:hover:not(:disabled) {
+    background: linear-gradient(135deg, #A01B2F 0%, #7A1624 100%);
     transform: translateY(-2px);
     box-shadow: var(--sombra-md);
   }
@@ -678,9 +707,9 @@
   /* BOTÓN REGISTRO (SECUNDARIO) */
   .boton-registro {
     padding: 1rem;
-    background: var(--primario-claro);
-    color: var(--primario);
-    border: 2px solid var(--primario);
+    background: #F5E8EB;
+    color: #C41E3A;
+    border: 2px solid #C41E3A;
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
@@ -692,31 +721,10 @@
   }
 
   .boton-registro:hover {
-    background: var(--primario);
+    background: #C41E3A;
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--sombra-md);
-  }
-
-  .boton-registro {
-    background: var(--primario-claro);
-    color: var(--primario);
-    border: 2px solid var(--primario);
-    border-radius: 8px;
-    padding: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.3s;
-  }
-  
-  .boton-registro:hover {
-    background: var(--primario);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--sombra-md);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   /* ENLACES ADICIONALES */
@@ -738,7 +746,7 @@
 
   /* PANEL INFORMATIVO (COLUMNA 2) */
   .panel-informativo {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #C41E3A 0%, #A01B2F 100%);
     color: white;
     padding: 3rem 2rem;
     display: flex;
@@ -755,15 +763,21 @@
   /* PASOS */
   .paso-info {
     display: flex;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
   }
 
+  .paso-info > div {
+    width: 100%;
+    text-align: left;
+  }
+
   .numero-paso {
-    min-width: 32px;
-    width: 32px;
-    height: 32px;
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid white;
     border-radius: 50%;
@@ -772,17 +786,20 @@
     justify-content: center;
     font-weight: 700;
     flex-shrink: 0;
+    font-size: 1.1rem;
   }
 
   .paso-info h4 {
     margin: 0 0 0.25rem 0;
     font-size: 1rem;
+    text-align: center;
   }
 
   .paso-info p {
     margin: 0;
     font-size: 0.9rem;
     opacity: 0.9;
+    text-align: center;
   }
 
   /* ESTADÍSTICAS */

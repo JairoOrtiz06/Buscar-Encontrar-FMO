@@ -100,13 +100,13 @@
 
   /* Estilos para links */
   :global(a) {
-    color: #0066cc;
+    color: #0088CC;
     text-decoration: none;
     transition: color 0.2s;
   }
 
   :global(a:hover) {
-    color: #0052a3;
+    color: #006BA3;
   }
 
   /* Estilos para botones */
