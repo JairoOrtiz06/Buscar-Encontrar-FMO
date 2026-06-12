@@ -31,13 +31,13 @@
         if (objeto) {
             objetosAprobados = [...objetosAprobados, objeto];
             objetosPendientes = objetosPendientes.filter(o => o.id !== id);
-            mostrarNotificacion("📦 Publicación aprobada");
+            mostrarNotificacion("Publicación aprobada");
         }
     }
 
     function rechazarObjeto(id: number) {
         objetosPendientes = objetosPendientes.filter(o => o.id !== id);
-        mostrarNotificacion("❌ Publicación rechazada");
+        mostrarNotificacion("Publicación rechazada");
     }
 
     function editarObjeto(objeto: any) {
@@ -48,7 +48,7 @@
         objetosPendientes = objetosPendientes.map(o =>
             o.id === objetoEditando.id ? objetoEditando : o
         );
-        mostrarNotificacion("✏️ Objeto editado");
+        mostrarNotificacion("Objeto editado");
         objetoEditando = null;
     }
 
@@ -63,7 +63,7 @@
         objetosAprobados = objetosAprobados.map(o =>
             o.id === id ? { ...o, activo: false } : o
         );
-        mostrarNotificacion("🚫 Objeto desactivado");
+        mostrarNotificacion("Objeto desactivado");
     }
 
     function mostrarNotificacion(mensaje: string) {
@@ -78,7 +78,7 @@
     <div class="notificacion">{notificacion}</div>
 {/if}
 
-<h2>📌 Objetos Pendientes</h2>
+<h2>Objetos Pendientes</h2>
 <div class="contenedor-cards">
     {#each objetosPendientes.filter(o => o.activo) as objeto}
     <div class="card">
@@ -98,7 +98,6 @@
             <button class="aprobar" on:click={() => aprobarObjeto(objeto.id)}>Aprobar</button>
             <button class="editar" on:click={() => editarObjeto(objeto)}>Editar</button>
             <button class="rechazar" on:click={() => rechazarObjeto(objeto.id)}>Rechazar</button>
-            <button class="desactivar" on:click={() => desactivarObjeto(objeto.id)}>Desactivar</button>
         </div>
     </div>
 {/each}
@@ -120,14 +119,24 @@
     </div>
 {/if}
 
-<h2>📚 Objetos Aprobados</h2>
+<h2> Objetos Aprobados</h2>
 {#each objetosAprobados.filter(o => o.activo) as objeto}
-    <div class="card">
-        <h3>{objeto.nombre}</h3>
-        <p>{objeto.categoria}</p>
-        <p>{objeto.ubicacion}</p>
-        <button class="desactivar" on:click={() => desactivarObjeto(objeto.id)}>Desactivar</button>
+    <div class="contenedor-cards">
+        <div class="card">
+        <div class="contenido-card">
+
+            <h3>{objeto.nombre}</h3>
+            <p><strong>Categoría:</strong> {objeto.categoria}</p>
+            <p><strong>Ubicación:</strong> {objeto.ubicacion}</p>
+            <p><strong>Fecha:</strong> {objeto.fecha}</p>
+            <p><strong>Publicado por:</strong> {objeto.publicadoPor}</p>
+
+        </div>
+
+        <img src={objeto.foto} alt={objeto.nombre} class="foto-carnet">
     </div>
+    </div>
+    
 {/each}
 
 <style>
@@ -144,12 +153,12 @@
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-   .contenedor-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  .contenedor-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
-    }
+}
 
 .card {
     background: white;
@@ -158,6 +167,7 @@
     box-shadow: 0 8px 20px rgba(0,0,0,.08);
     border-top: 5px solid #b30000;
     transition: .3s;
+    width: 420px;
 }
 
 .card:hover {
@@ -205,10 +215,6 @@
     color: white;
 }
 
-.desactivar {
-    background: #f59e0b;
-    color: white;
-}
 .acciones button {
     flex: 1;
     min-width: 100px;
