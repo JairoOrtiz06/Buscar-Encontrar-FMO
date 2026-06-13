@@ -413,40 +413,6 @@ export function validarRegistroAdministrativo(datos) {
     };
 }
 
-// Validar formulario completo de REGISTRO para VIGILANTE, CONSERJE, LIMPIEZA
-export function validarRegistroOtro(datos) {
-    const errores = {};
-    
-    // Campos generales
-    const validNombre = validarNombre(datos.nombre);
-    if (!validNombre.valido) errores.nombre = validNombre.error;
-    
-    const validCorreo = validarCorreo(datos.correo);
-    if (!validCorreo.valido) errores.correo = validCorreo.error;
-    
-    const validTelefono = validarTelefono(datos.telefono);
-    if (!validTelefono.valido) errores.telefono = validTelefono.error;
-    
-    const validDUI = validarDUI(datos.dui);
-    if (!validDUI.valido) errores.dui = validDUI.error;
-    
-    // Código institucional obligatorio
-    const validCodigo = validarCodigoInstitucional(datos.codigoInstitucional);
-    if (!validCodigo.valido) errores.codigoInstitucional = validCodigo.error;
-    
-    // Contraseña
-    const validContrasena = validarContrasena(datos.contrasena);
-    if (!validContrasena.valido) errores.contrasena = validContrasena.error;
-    
-    const validConfirmacion = validarConfirmacionContrasena(datos.contrasena, datos.confirmacion);
-    if (!validConfirmacion.valido) errores.confirmacion = validConfirmacion.error;
-    
-    return {
-        esValido: Object.keys(errores).length === 0,
-        errores
-    };
-}
-
 // ============================================================
 // 4. EXPORTAR TODO EL MÓDULO
 // ============================================================
@@ -470,6 +436,5 @@ export default {
     validarLoginCompleto,
     validarRegistroEstudiante,
     validarRegistroDocente,
-    validarRegistroAdministrativo,
-    validarRegistroOtro
+    validarRegistroAdministrativo
 };

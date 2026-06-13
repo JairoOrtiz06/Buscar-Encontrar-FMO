@@ -44,10 +44,10 @@ export const CATEGORIAS_USUARIOS = {
         descripcion: 'Personal de vigilancia',
         camposEspecificos: ['codigoInstitucional']
     },
-    CONSERJE: {
-        id: 'conserje',
-        nombre: 'Conserje',
-        descripcion: 'Personal de conserjería',
+    MANTENIMIENTO: {
+        id: 'mantenimiento',
+        nombre: 'Personal de Mantenimiento',
+        descripcion: 'Personal de mantenimiento e infraestructura',
         camposEspecificos: ['codigoInstitucional']
     },
     LIMPIEZA: {
@@ -55,12 +55,6 @@ export const CATEGORIAS_USUARIOS = {
         nombre: 'Personal de Limpieza',
         descripcion: 'Personal de limpieza e intendencia',
         camposEspecificos: ['codigoInstitucional']
-    },
-    OTROS: {
-        id: 'otros',
-        nombre: 'Otros',
-        descripcion: 'Visitante o persona externa',
-        camposEspecificos: ['descripcion']
     }
 };
 
@@ -263,7 +257,7 @@ export async function registrarUsuario(datos) {
         }
 
         // VALIDACIONES PARA DOCENTE, ADMIN, VIGILANTE, CONSERJE, LIMPIEZA
-        if (['docente', 'administrativo', 'vigilante', 'conserje', 'limpieza'].includes(tipo)) {
+        if (['docente', 'administrativo', 'vigilante', 'mantenimiento', 'limpieza'].includes(tipo)) {
             if (!codigoInstitucional || codigoInstitucional.trim().length === 0) {
                 return {
                     exito: false,
@@ -326,7 +320,7 @@ export async function registrarUsuario(datos) {
             }),
 
             // CAMPOS ESPECÍFICOS PARA VIGILANTE, CONSERJE, LIMPIEZA
-            ...(['vigilante', 'conserje', 'limpieza'].includes(tipo) && {
+            ...(['vigilante', 'mantenimiento', 'limpieza'].includes(tipo) && {
                 codigoInstitucional: codigoInstitucional
             }),
 

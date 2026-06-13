@@ -63,7 +63,6 @@
     validarRegistroEstudiante,
     validarRegistroDocente,
     validarRegistroAdministrativo,
-    validarRegistroOtro,
     obtenerFortaleaContrasena
   } from '../utilidades/validaciones.js';
 
@@ -259,8 +258,6 @@
       validacion = validarRegistroDocente(datos);
     } else if (datos.tipo === 'administrativo') {
       validacion = validarRegistroAdministrativo(datos);
-    } else {
-      validacion = validarRegistroOtro(datos);
     }
 
     // Si hay errores, mostrarlos y salir
@@ -594,8 +591,8 @@
               </div>
             {/if}
 
-            <!-- PARA VIGILANTE, CONSERJE, LIMPIEZA -->
-            {#if ['vigilante', 'conserje', 'limpieza'].includes(datos.tipo)}
+            <!-- PARA VIGILANTE, MANTENIMIENTO, LIMPIEZA -->
+            {#if ['vigilante', 'mantenimiento', 'limpieza'].includes(datos.tipo)}
               <!-- Código Institucional -->
               <div class="campo-formulario">
                 <label for="codigoOtro">Código Institucional</label>
@@ -613,22 +610,6 @@
                 {#if errores.codigoInstitucional}
                   <span class="error-mensaje">{errores.codigoInstitucional}</span>
                 {/if}
-              </div>
-            {/if}
-
-            <!-- PARA OTROS -->
-            {#if datos.tipo === 'otros'}
-              <!-- Descripción -->
-              <div class="campo-formulario">
-                <label for="descripcion">Descripcion</label>
-                <textarea
-                  id="descripcion"
-                  class="entrada entrada-textarea"
-                  placeholder="Describe brevemente quién eres y por qué te registras"
-                  bind:value={datos.descripcion}
-                  disabled={$estaCargando}
-                  rows="3"
-                ></textarea>
               </div>
             {/if}
           </fieldset>
@@ -772,21 +753,19 @@
 
   /* LOGO */
   .logo-contenedor {
-    margin-bottom: 1.5rem;
+    margin-bottom: -0.1rem;
     animation: deslizarAbajo 0.6s ease-out;
   }
 
   .logo-ues {
-    height: 80px;
+    height: 150px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 
   /* CONTENEDOR PRINCIPAL */
   .contenedor-registro {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #C41E3A 0%, #E01D3A 50%, #A01B2F 100%);
+    background: #F5F5F5;
     display: flex;
     flex-direction: column;
     padding: 2rem 1rem;
@@ -796,24 +775,26 @@
   .encabezado-registro {
     text-align: center;
     color: white;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     animation: deslizarAbajo 0.6s ease-out;
+    padding: 0.1rem;
+    border-radius: 12px;
   }
 
   .encabezado-registro h1 {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     letter-spacing: 2px;
-    color: #FFFFFF;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .subtitulo {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin: 0.5rem 0 0 0;
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin: 0;
     font-weight: 300;
+    color: black;
   }
 
   /* SECCIÓN */
@@ -829,9 +810,10 @@
      ======================================== */
 
   .tarjeta-categorias {
-    background: white;
+    background: #FAFAFA;
     border-radius: 16px;
-    box-shadow: var(--sombra-lg);
+    box-shadow: 0 10px 30px rgba(196, 30, 58, 0.2);
+    border-top: 5px solid #C41E3A;
     padding: 3rem 2rem;
     width: 100%;
     max-width: 900px;
@@ -841,17 +823,27 @@
   .encabezado-categorias {
     text-align: center;
     margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #C41E3A;
   }
 
   .encabezado-categorias h2 {
     font-size: 1.75rem;
-    color: var(--texto);
-    margin: 0 0 0.5rem 0;
+    color: #C41E3A;
+    margin: 0;
+    font-weight: 700;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
   }
 
   .encabezado-categorias p {
-    color: var(--texto-secundario);
-    margin: 0;
+    color: #666666;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.95rem;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
   }
 
   /* GRID DE BOTONES CATEGORÍA */
@@ -865,45 +857,69 @@
   /* BOTÓN CATEGORÍA */
   .boton-categoria {
     background: white;
-    border: 2px solid var(--borde);
+    border: 2px solid #E0E0E0;
     border-radius: 12px;
-    padding: 1.5rem 1rem;
+    padding: 2rem 1.5rem;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    min-height: 250px;
+  }
+
+  .boton-categoria:hover {
+    border-color: #C41E3A;
+    background: linear-gradient(135deg, #FFF5F7 0%, #FFFFFF 100%);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(196, 30, 58, 0.15);
+    border-width: 2px;
+  }
+
+  .contenido-categoria {
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
   }
 
-  .boton-categoria:hover {
-    border-color: var(--primario);
-    background: var(--primario-claro);
-    transform: translateY(-4px);
-    box-shadow: var(--sombra-md);
-  }
-
   .contenido-categoria h3 {
-    font-size: 1.1rem;
-    color: var(--texto);
+    font-size: 1.2rem;
+    color: #C41E3A;
     margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
   }
 
   .contenido-categoria p {
     font-size: 0.9rem;
-    color: var(--texto-secundario);
-    margin: 0 0 1rem 0;
+    color: #666666;
+    margin: 0.5rem 0 0 0;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
   }
 
   .indicador-siguiente {
     display: inline-block;
     font-size: 0.85rem;
-    color: var(--primario);
+    color: white;
     font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    background: var(--primario-claro);
+    padding: 0.5rem 1.2rem;
+    background: #C41E3A;
     border-radius: 20px;
+    transition: all 0.2s;
+    margin-top: auto;
+  }
+
+  .boton-categoria:hover .indicador-siguiente {
+    background: #A01B2F;
   }
 
   /* ========================================
