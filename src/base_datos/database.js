@@ -36,7 +36,7 @@ export async function crearAdminPorDefecto() {
             };
             
             await db.add('usuarios', nuevoAdmin);
-            console.log('Admin por defecto creado: ma22013@ues.edu.sv / Ma22013$UES2022!');
+            console.log('Admin por defecto creado: ma22013@ues.edu.sv');
         }
     } catch (error) {
         console.error('Error creando admin por defecto:', error);

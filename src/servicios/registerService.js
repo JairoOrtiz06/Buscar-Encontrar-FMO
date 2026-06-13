@@ -15,6 +15,74 @@
 
 import { dbPromise } from '../base_datos/database.js';
 
+
+/**
+ * DEPARTAMENTOS Y CARRERAS DE UES-FMO
+ * Estructura: departamento → carreras[]
+ */
+export const DEPARTAMENTOS_CARRERAS = {
+  'Ciencias Naturales y Matemática': [
+    'Licenciatura en Biología',
+    'Licenciatura en Ciencias Químicas',
+    'Licenciatura en Física',
+    'Licenciatura en Matemática'
+  ],
+  'Ciencias Económicas': [
+    'Licenciatura en Economía',
+    'Licenciatura en Contaduría Pública',
+    'Licenciatura en Administración de Empresas',
+    'Licenciatura en Mercadeo Internacional',
+    'Licenciatura en Logística Comercial Internacional'
+  ],
+  'Ciencias y Humanidades': [
+    'Licenciatura en Ciencias de la Educación en la Especialidad de Primero y Segundo Ciclo de Educación Básica',
+    'Licenciatura en Educación Inicial y Parvularia',
+    'Licenciatura en Lenguas Modernas: Especialidad en Francés e Inglés',
+    'Licenciatura en Letras',
+    'Licenciatura en Psicología',
+    'Licenciatura en Sociología'
+  ],
+  'Ingeniería y Arquitectura': [
+    'Arquitectura',
+    'Ingeniería Civil',
+    'Ingeniería de Sistemas Informáticos',
+    'Ingeniería Industrial',
+    'Ingeniería Eléctrica',
+    'Ingeniería Mecánica'
+  ],
+  'Medicina': [
+    'Doctorado en Medicina',
+    'Licenciatura en Anestesiología e Inhaloterapia',
+    'Licenciatura en Fisioterapia y Terapia Ocupacional',
+    'Licenciatura en Laboratorio Clínico'
+  ],
+  'Jurisprudencia y Ciencias Sociales': [
+    'Licenciatura en Ciencias Jurídicas'
+  ],
+  'Ciencias Agronómicas': [
+    'Ingeniería Agronómica',
+    'Técnico en Veterinaria y Zootecnia'
+  ],
+  'Química y Farmacia': [
+    'Licenciatura en Química y Farmacia'
+  ]
+};
+
+/**
+ * Obtener lista de departamentos
+ */
+export function obtenerDepartamentos() {
+  return Object.keys(DEPARTAMENTOS_CARRERAS);
+}
+
+/**
+ * Obtener carreras de un departamento específico
+ */
+export function obtenerCarrerasPorDepartamento(departamento) {
+  return DEPARTAMENTOS_CARRERAS[departamento] || [];
+}
+
+
 // ============================================================
 // 1. DEFINICIÓN DE CATEGORÍAS DE USUARIOS (Segmentación clara)
 // ============================================================

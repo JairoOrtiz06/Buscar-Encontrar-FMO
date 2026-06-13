@@ -46,6 +46,8 @@
     registrarUsuario,
     obtenerCategorias,
     obtenerInfoCategoria,
+    obtenerDepartamentos,
+    obtenerCarrerasPorDepartamento,
     CATEGORIAS_USUARIOS
   } from '../servicios/registerService.js';
   
@@ -63,7 +65,9 @@
     validarRegistroEstudiante,
     validarRegistroDocente,
     validarRegistroAdministrativo,
-    obtenerFortaleaContrasena
+    obtenerFortaleaContrasena,
+    validarCorreo,
+    validarCorreoEstudiante
   } from '../utilidades/validaciones.js';
 
   // ========================================
@@ -122,11 +126,20 @@
   // Usuario selecciona una categoría
   // Se guarda y se avanza al paso 2
   function seleccionarCategoria(tipoId) {
+    // LIMPIAR TODOS LOS CAMPOS cuando cambias de categoría
     categoriaSeleccionada = obtenerInfoCategoria(tipoId);
     datos.tipo = tipoId;
+    // Limpiar SOLO campos específicos de forma segura
+    datos.carnet = '';
+    datos.carrera = '';
+    datos.departamento = '';
+    datos.codigoInstitucional = '';
+    datos.areaOficina = '';
+    datos.descripcion = '';
+    errores = {};
     pasoActual = 2;
     console.log('Categoría seleccionada:', tipoId);
-  }
+}
 
   // Volver al paso 1 desde paso 2
   import { irA } from '../stores/navegacionStore.js';
@@ -162,8 +175,11 @@
         break;
 
       case 'correo':
-        if (!datos.correo || !datos.correo.includes('@')) {
-          errores.correo = 'Email invalido';
+        const vCorreo = validarCorreo(datos.correo);
+        if (!vCorreo.valido) {
+          errores.correo = vCorreo.error;
+        } else {
+          errores.correo = null;
         }
         break;
 
@@ -252,6 +268,17 @@
     // Validar según tipo de usuario
     let validacion;
     
+    if (datos.tipo === 'estudiante') {
+      const validCorreoEstud = validarCorreoEstudiante(datos.correo, datos.carnet);
+      if (!validCorreoEstud.valido) {
+        errores.correo = validCorreoEstud.error;
+        errores = errores;
+        return;
+      }
+    }
+
+    // Validar según tipo de usuario
+
     if (datos.tipo === 'estudiante') {
       validacion = validarRegistroEstudiante(datos);
     } else if (datos.tipo === 'docente') {
@@ -346,7 +373,7 @@
      PASO 2: LLENAR FORMULARIO
      ======================================== -->
 
-{:else if pasoActual === 2}
+{:else if pasoActual === 2 && categoriaSeleccionada}
   <main class="contenedor-registro">
     <header class="encabezado-registro">
       <h1>Encuentra UES-FMO</h1>
@@ -405,6 +432,7 @@
                 bind:value={datos.correo}
                 on:blur={() => validarCampo('correo')}
                 disabled={$estaCargando}
+                pattern="[a-zA-Z0-9._-]+@ues\.edu\.sv"
                 required
               />
               {#if errores.correo}
@@ -424,6 +452,9 @@
                 bind:value={datos.telefono}
                 on:blur={() => validarCampo('telefono')}
                 disabled={$estaCargando}
+                pattern="[0-9\-]{8,9}"
+                inputmode="numeric"
+                maxlength="9"
                 required
               />
               {#if errores.telefono}
@@ -476,7 +507,28 @@
                 {/if}
               </div>
 
-              <!-- Carrera -->
+              <!-- Departamento -->
+              <div class="campo-formulario">
+                <label for="departamento-estudiante">Departamento</label>
+                <select
+                  id="departamento-estudiante"
+                  class="entrada"
+                  class:entrada-error={errores.departamento}
+                  bind:value={datos.departamento}
+                  disabled={$estaCargando}
+                  required
+                >
+                  <option value="">Selecciona tu departamento</option>
+                  {#each obtenerDepartamentos() as depto}
+                    <option value={depto}>{depto}</option>
+                  {/each}
+                </select>
+                {#if errores.departamento}
+                  <span class="error-mensaje">{errores.departamento}</span>
+                {/if}
+              </div>
+
+              <!-- Carrera (filtrada por departamento) -->
               <div class="campo-formulario">
                 <label for="carrera">Carrera</label>
                 <select
@@ -485,18 +537,19 @@
                   class:entrada-error={errores.carrera}
                   bind:value={datos.carrera}
                   on:blur={() => validarCampo('carrera')}
-                  disabled={$estaCargando}
+                  disabled={!datos.departamento || $estaCargando}
                   required
                 >
-                  <option value="">Selecciona una carrera</option>
-                  <option value="Ingenieria en Sistemas">Ingenieria en Sistemas</option>
-                  <option value="Ingenieria en Electrica">Ingenieria en Electrica</option>
-                  <option value="Ingenieria en Mecanica">Ingenieria en Mecanica</option>
-                  <option value="Administracion de Empresas">Administracion de Empresas</option>
-                  <option value="Contabilidad">Contabilidad</option>
-                  <option value="Enfermeria">Enfermeria</option>
-                  <option value="Psicologia">Psicologia</option>
-                  <option value="Derecho">Derecho</option>
+                  <option value="">
+                    {#if datos.departamento}
+                      Selecciona tu carrera
+                    {:else}
+                      Selecciona primero un departamento
+                    {/if}
+                  </option>
+                  {#each obtenerCarrerasPorDepartamento(datos.departamento) as carrera}
+                    <option value={carrera}>{carrera}</option>
+                  {/each}
                 </select>
                 {#if errores.carrera}
                   <span class="error-mensaje">{errores.carrera}</span>
@@ -527,9 +580,9 @@
 
               <!-- Departamento -->
               <div class="campo-formulario">
-                <label for="departamento">Departamento</label>
+                <label for="departamento-docente">Departamento</label>
                 <select
-                  id="departamento"
+                  id="departamento-docente"
                   class="entrada"
                   class:entrada-error={errores.departamento}
                   bind:value={datos.departamento}
@@ -537,17 +590,16 @@
                   disabled={$estaCargando}
                   required
                 >
-                  <option value="">Selecciona un departamento</option>
-                  <option value="Ingenieria y Arquitectura">Ingenieria y Arquitectura</option>
-                  <option value="Ciencias Naturales y Matematica">Ciencias Naturales y Matematica</option>
-                  <option value="Estudios Generales">Estudios Generales</option>
-                  <option value="Ciencias Sociales">Ciencias Sociales</option>
-                  <option value="Salud Publica">Salud Publica</option>
+                  <option value="">Selecciona tu departamento</option>
+                  {#each obtenerDepartamentos() as depto}
+                    <option value={depto}>{depto}</option>
+                  {/each}
                 </select>
                 {#if errores.departamento}
                   <span class="error-mensaje">{errores.departamento}</span>
                 {/if}
               </div>
+
             {/if}
 
             <!-- PARA ADMINISTRATIVO -->
@@ -1058,6 +1110,34 @@
   .entrada-textarea {
     resize: vertical;
     font-family: inherit;
+  }
+
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: #C41E3A;
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+  }
+
+  select:disabled {
+    background: #F5F5F5;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  select.entrada-error {
+    border-color: #C41E3A;
   }
 
   /* BOTÓN TOGGLE */

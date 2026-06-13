@@ -60,14 +60,18 @@ export function validarCorreo(correo) {
         return { valido: false, error: 'El correo es requerido' };
     }
     
-    const trimmed = correo.trim();
+    const trimmed = correo.trim().toLowerCase();
+
+    // Validar que sea correo de UES
+    if (!trimmed.endsWith('@ues.edu.sv')) {
+        return { valido: false, error: 'El correo debe ser del dominio @ues.edu.sv' };
+    }
     
-    // Expresión regular básica para email
-    // Valida: algo@algo.algo
-    const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Expresión regular para correo UES
+    const regexCorreo = /^[a-zA-Z0-9._-]+@ues\.edu\.sv$/;
     
     if (!regexCorreo.test(trimmed)) {
-        return { valido: false, error: 'Formato de correo invalido' };
+        return { valido: false, error: 'Solo se aceptan correos de dominio @ues.edu.sv' };
     }
     
     if (trimmed.includes(' ')) {
@@ -76,6 +80,30 @@ export function validarCorreo(correo) {
     
     return { valido: true, error: null };
 }
+
+/**
+ * Validar que el correo del estudiante coincida con su carnet
+ * Ejemplo: carnet MA22013 → correo debe ser ma22013@ues.edu.sv
+ */
+export function validarCorreoEstudiante(correo, carnet) {
+    if (!carnet || !correo) {
+        return { valido: false, error: 'Correo y carnet son requeridos' };
+    }
+    
+    const correoTrimmed = correo.trim().toLowerCase();
+    const carnetTrimmed = carnet.trim().toLowerCase();
+    
+    // Extraer la parte local del correo (antes del @)
+    const parteLocalCorreo = correoTrimmed.split('@')[0];
+    
+    // El correo debe empezar con el carnet en minúscula
+    if (parteLocalCorreo !== carnetTrimmed) {
+        return { valido: false, error: `El correo no es válido` };
+    }
+    
+    return { valido: true, error: null };
+}
+
 
 // Validar teléfono salvadoreño
 // Requisitos:
@@ -89,13 +117,13 @@ export function validarTelefono(telefono) {
     
     const trimmed = telefono.trim();
     // Remover espacios, guiones, paréntesis
-    const telefonoLimpio = trimmed.replace(/[\s\-()]/g, '');
+    const telefonoLimpio = trimmed.replace(/[\s\-]/g, '');
     
-    // Validar que tenga entre 7 y 8 dígitos (formato salvadoreño)
-    const regexTelefono = /^(\+503)?(\d{7,8}|\d{4}-\d{4})$/;
+    // Validar que sean EXACTAMENTE 8 dígitos
+    const regexTelefono = /^\d{8}$/;
     
-    if (!regexTelefono.test(telefonoLimpio) && telefonoLimpio.length < 8) {
-        return { valido: false, error: 'Telefono invalido. Ejemplo: 2345-6789' };
+    if (!regexTelefono.test(telefonoLimpio)) {
+        return { valido: false, error: 'El telefono debe tener exactamente 8 dígitos. Ejemplo: 23456789' };
     }
     
     return { valido: true, error: null };
@@ -323,6 +351,9 @@ export function validarRegistroEstudiante(datos) {
     const validCarnet = validarCarnet(datos.carnet);
     if (!validCarnet.valido) errores.carnet = validCarnet.error;
     
+    const validDepartamento = validarCampoRequerido(datos.departamento, 'El departamento');
+    if (!validDepartamento.valido) errores.departamento = validDepartamento.error;
+
     const validCarrera = validarCampoRequerido(datos.carrera, 'La carrera');
     if (!validCarrera.valido) errores.carrera = validCarrera.error;
     
