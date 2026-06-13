@@ -41,8 +41,11 @@
   
   // Se ejecuta cuando la app monta en el DOM
   // Restaura la sesión si el usuario recarga la página
+  import { crearAdminPorDefecto } from './base_datos/database.js';
+
   onMount(async () => {
     console.log('App montada - restaurando sesión...');
+    await crearAdminPorDefecto();
     await restaurarSesionDesdeStorage();
   });
 </script>

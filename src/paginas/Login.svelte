@@ -173,9 +173,6 @@
         establecerUsuarioAutenticado(resultado.usuario, resultado.token);
         console.log('Login exitoso');
         
-        // Redirigir a dashboard
-        // NOTA: En una app real usarías un router (SvelteKit, page.js, etc)
-        window.location.href = '/dashboard';
       } else {
         // Login falló: mostrar mensaje de error
         establecerError(resultado.mensaje);

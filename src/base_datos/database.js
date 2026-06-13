@@ -1,5 +1,49 @@
 import { openDB } from 'idb';
 
+
+/**
+ * Crear usuario administrador por defecto en la primera ejecución
+ * Solo se crea si no existe ningún admin en la BD
+ */
+export async function crearAdminPorDefecto() {
+    try {
+        const db = await dbPromise;
+        
+        // Verificar si ya existe un admin
+        const adminExistente = await db.getFromIndex('usuarios', 'correo', 'admin@ues.edu.sv');
+        
+        if (!adminExistente) {
+            // Crear hash de contraseña
+            let hash = 0;
+            const contrasena = 'Ma22013$UES2022!';
+            for (let i = 0; i < contrasena.length; i++) {
+                const char = contrasena.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            const nuevoAdmin = {
+                nombre: 'Yanira Martínez',
+                correo: 'ma22013@ues.edu.sv',
+                telefono: '7262-7931',
+                dui: '06740701-9',
+                contrasena: `hash_${Math.abs(hash).toString(16)}`,
+                tipo: 'admin',
+                validado: true,
+                estado: 'aprobado',
+                fechaRegistro: new Date().toISOString(),
+                codigoInstitucional: 'MA22013'
+            };
+            
+            await db.add('usuarios', nuevoAdmin);
+            console.log('Admin por defecto creado: ma22013@ues.edu.sv / Ma22013$UES2022!');
+        }
+    } catch (error) {
+        console.error('Error creando admin por defecto:', error);
+    }
+}
+
+
 export const dbPromise = openDB('encuentraUES', 1, {
     upgrade(db) {
 
@@ -13,6 +57,10 @@ export const dbPromise = openDB('encuentraUES', 1, {
             store.createIndex('carnet', 'carnet', { unique: false });
             store.createIndex('tipo', 'tipo', { unique: false });
             store.createIndex('validado', 'validado', { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains('sesiones')) {
+            db.createObjectStore('sesiones', { keyPath: 'id', autoIncrement: true });
         }
 
         //OBJETOS
