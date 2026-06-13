@@ -67,7 +67,15 @@
     validarRegistroAdministrativo,
     obtenerFortaleaContrasena,
     validarCorreo,
-    validarCorreoEstudiante
+    validarCorreoEstudiante,
+    validarNombre,
+    validarTelefono,
+    validarDUI,
+    validarCarnet,
+    validarContrasena,
+    validarConfirmacionContrasena,
+    validarCampoRequerido,
+    validarCodigoInstitucional
   } from '../utilidades/validaciones.js';
 
   // ========================================
@@ -130,6 +138,12 @@
     categoriaSeleccionada = obtenerInfoCategoria(tipoId);
     datos.tipo = tipoId;
     // Limpiar SOLO campos específicos de forma segura
+    datos.nombre = '';
+    datos.correo = '';
+    datos.telefono = '';
+    datos.dui = '';
+    datos.contrasena = '';
+    datos.confirmacion = '';
     datos.carnet = '';
     datos.carrera = '';
     datos.departamento = '';
@@ -137,6 +151,8 @@
     datos.areaOficina = '';
     datos.descripcion = '';
     errores = {};
+    mostrarContrasena = false;
+    mostrarConfirmacion = false;
     pasoActual = 2;
     console.log('Categoría seleccionada:', tipoId);
 }
@@ -163,84 +179,63 @@
   // Validar un campo individual
   // Se llama en onBlur de cada input
   function validarCampo(campo) {
-    // Remover error anterior de este campo
-    errores[campo] = null;
-
-    // Validar según el campo
     switch (campo) {
       case 'nombre':
-        if (!datos.nombre || datos.nombre.trim().length < 3) {
-          errores.nombre = 'El nombre debe tener al menos 3 caracteres';
-        }
+        const vNombre = validarNombre(datos.nombre);
+        errores.nombre = vNombre.valido ? null : vNombre.error;
         break;
 
       case 'correo':
         const vCorreo = validarCorreo(datos.correo);
-        if (!vCorreo.valido) {
-          errores.correo = vCorreo.error;
-        } else {
-          errores.correo = null;
-        }
+        errores.correo = vCorreo.valido ? null : vCorreo.error;
         break;
 
       case 'telefono':
-        if (!datos.telefono || datos.telefono.trim().length < 8) {
-          errores.telefono = 'Telefono invalido. Minimo 8 digitos';
-        }
+        const vTelefono = validarTelefono(datos.telefono);
+        errores.telefono = vTelefono.valido ? null : vTelefono.error;
         break;
 
       case 'dui':
-        const duiRegex = /^\d{8}-\d{1}$/;
-        if (!datos.dui || !duiRegex.test(datos.dui)) {
-          errores.dui = 'Formato de DUI invalido. Debe ser: 12345678-9';
-        }
+        const vDUI = validarDUI(datos.dui);
+        errores.dui = vDUI.valido ? null : vDUI.error;
         break;
 
       case 'carnet':
-        const carnetRegex = /^[A-Z]{2}\d{5}$/;
-        if (datos.tipo === 'estudiante' && (!datos.carnet || !carnetRegex.test(datos.carnet.toUpperCase()))) {
-          errores.carnet = 'Carnet invalido. Formato: MA22013';
-        }
+        const vCarnet = validarCarnet(datos.carnet);
+        errores.carnet = vCarnet.valido ? null : vCarnet.error;
         break;
 
       case 'contrasena':
-        if (!datos.contrasena || datos.contrasena.length < 8) {
-          errores.contrasena = 'La contraseña debe tener minimo 8 caracteres';
-        }
+        const vContrasena = validarContrasena(datos.contrasena);
+        errores.contrasena = vContrasena.valido ? null : vContrasena.error;
         break;
 
       case 'confirmacion':
-        if (datos.contrasena !== datos.confirmacion) {
-          errores.confirmacion = 'Las contraseñas no coinciden';
-        }
+        const vConfirmacion = validarConfirmacionContrasena(datos.contrasena, datos.confirmacion);
+        errores.confirmacion = vConfirmacion.valido ? null : vConfirmacion.error;
         break;
 
       case 'carrera':
-        if (!datos.carrera || datos.carrera.trim().length === 0) {
-          errores.carrera = 'Debes seleccionar una carrera';
-        }
-        break;
-
-      case 'codigoInstitucional':
-        if (!datos.codigoInstitucional || datos.codigoInstitucional.trim().length === 0) {
-          errores.codigoInstitucional = 'El codigo institucional es obligatorio';
-        }
+        const vCarrera = validarCampoRequerido(datos.carrera, 'La carrera');
+        errores.carrera = vCarrera.valido ? null : vCarrera.error;
         break;
 
       case 'departamento':
-        if (!datos.departamento || datos.departamento.trim().length === 0) {
-          errores.departamento = 'Debes seleccionar un departamento';
-        }
+        const vDepartamento = validarCampoRequerido(datos.departamento, 'El departamento');
+        errores.departamento = vDepartamento.valido ? null : vDepartamento.error;
+        break;
+
+      case 'codigoInstitucional':
+        const vCodigo = validarCodigoInstitucional(datos.codigoInstitucional);
+        errores.codigoInstitucional = vCodigo.valido ? null : vCodigo.error;
         break;
 
       case 'areaOficina':
-        if (!datos.areaOficina || datos.areaOficina.trim().length === 0) {
-          errores.areaOficina = 'Debes indicar tu area de trabajo';
-        }
+        const vArea = validarCampoRequerido(datos.areaOficina, 'El area de trabajo');
+        errores.areaOficina = vArea.valido ? null : vArea.error;
         break;
     }
 
-    // Provocar reactividad
     errores = errores;
   }
 
