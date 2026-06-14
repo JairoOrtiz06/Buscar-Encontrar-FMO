@@ -164,7 +164,7 @@ export function validarCarnet(carnet) {
     const regexCarnet = /^[A-Z]{2}\d{5}$/;
     
     if (!regexCarnet.test(trimmed)) {
-        return { valido: false, error: 'Carnet invalido. Formato: MA22013' };
+        return { valido: false, error: 'Carnet invalido' };
     }
     
     return { valido: true, error: null };

@@ -491,10 +491,14 @@
                   type="text"
                   class="entrada"
                   class:entrada-error={errores.carnet}
-                  placeholder="MA22013"
+                  placeholder="YV22084"
                   bind:value={datos.carnet}
                   on:blur={() => validarCampo('carnet')}
+                  on:input={() => { datos.carnet = datos.carnet.toUpperCase(); }}
                   disabled={$estaCargando}
+                  pattern="[A-Z]{2}[0-9]{5}"
+                  maxlength="7"
+                  inputmode="text"
                   required
                 />
                 {#if errores.carnet}
