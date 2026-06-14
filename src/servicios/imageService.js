@@ -7,6 +7,7 @@
  */
 
 import * as faceapi from 'face-api.js';
+import Tesseract from 'tesseract.js';
 
 // Variable global para rastrear si los modelos están cargados
 let modelosCargados = false;
@@ -205,6 +206,140 @@ export async function validarFotoCarnet(archivo) {
     return { valido: true, error: null, base64 };
 }
 
+/**
+ * Leer texto del carnet con OCR
+ */
+async function leerTextoCarnet(imageBase64) {
+    try {
+        const result = await Tesseract.recognize(imageBase64, 'spa');
+        return result.data.text.toUpperCase();
+    } catch (error) {
+        console.error('Error en OCR:', error);
+        throw new Error('No se pudo leer el carnet');
+    }
+}
+
+/**
+ * Extraer descriptor facial de una imagen
+ * Se usa para comparar rostros después
+ */
+export async function extraerDescriptorFacial(imageBase64) {
+    try {
+        await cargarModelosFaceAPI();
+        
+        const img = new Image();
+        img.src = imageBase64;
+        
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+        });
+        
+        const detecciones = await faceapi
+            .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptors();
+        
+        if (!detecciones) {
+            return null;
+        }
+        
+        // Retornar el descriptor (array de números)
+        return detecciones.descriptor;
+    } catch (error) {
+        console.error('Error extrayendo descriptor:', error);
+        return null;
+    }
+}
+
+/**
+ * Comparar dos rostros
+ * Retorna un número entre 0 y 1 (0 = idénticos, 1 = completamente diferentes)
+ * Si está por debajo de 0.6, consideramos que son la misma persona
+ */
+export function compararRostros(descriptor1, descriptor2) {
+    if (!descriptor1 || !descriptor2) {
+        return null;
+    }
+    
+    let distancia = 0;
+    for (let i = 0; i < descriptor1.length; i++) {
+        const diff = descriptor1[i] - descriptor2[i];
+        distancia += diff * diff;
+    }
+    
+    return Math.sqrt(distancia);
+}
+
+/**
+ * Validación completa del carnet
+ */
+export async function validarFotoCarnetCompleta(archivoCarnet, fotoPerfil) {
+    // Primero validar tipo y tamaño
+    const validType = validarTipoImagen(archivoCarnet);
+    if (!validType.valido) {
+        return { valido: false, error: validType.error, base64: null };
+    }
+    
+    const validSize = validarTamanoImagen(archivoCarnet);
+    if (!validSize.valido) {
+        return { valido: false, error: validSize.error, base64: null };
+    }
+    
+    let base64Carnet;
+    try {
+        base64Carnet = await convertirABase64(archivoCarnet);
+    } catch (error) {
+        return { valido: false, error: 'Error leyendo la imagen', base64: null };
+    }
+    
+    // Detectar rostro en carnet
+    const deteccionCarnet = await detectarRostro(base64Carnet);
+    if (!deteccionCarnet.rostroDetectado) {
+        return { valido: false, error: 'No se detectó un rostro claro en el carnet', base64: null };
+    }
+    
+    // Leer texto con OCR
+    let textoCarnet;
+    try {
+        textoCarnet = await leerTextoCarnet(base64Carnet);
+    } catch (error) {
+        return { valido: false, error: 'No se pudo leer el texto del carnet', base64: null };
+    }
+    
+    // Verificar que sea carnet de UES
+    if (!textoCarnet.includes('UNIVERSIDAD') || !textoCarnet.includes('SALVADOR')) {
+        return { valido: false, error: 'Este no parece ser un carnet de UES válido', base64: null };
+    }
+    
+    // Extraer descriptores faciales
+    const descriptorCarnet = await extraerDescriptorFacial(base64Carnet);
+    const descriptorPerfil = await extraerDescriptorFacial(fotoPerfil);
+    
+    if (!descriptorCarnet || !descriptorPerfil) {
+        return { valido: false, error: 'No se pudieron procesar los rostros', base64: null };
+    }
+    
+    // Comparar rostros
+    const distancia = compararRostros(descriptorCarnet, descriptorPerfil);
+    
+    // Si distancia > 0.6, no es la misma persona
+    if (distancia > 0.6) {
+        return {
+            valido: false,
+            error: `El rostro del carnet no coincide con tu foto de perfil (similitud: ${(100 - distancia * 100).toFixed(0)}%)`,
+            base64: null
+        };
+    }
+    
+    return {
+        valido: true,
+        error: null,
+        base64: base64Carnet,
+        similitud: (100 - distancia * 100).toFixed(0)
+    };
+}
+
 export default {
     cargarModelosFaceAPI,
     validarTipoImagen,
@@ -212,5 +347,8 @@ export default {
     convertirABase64,
     detectarRostro,
     validarFotoPerfil,
-    validarFotoCarnet
+    validarFotoCarnet,
+    extraerDescriptorFacial,
+    compararRostros,
+    validarFotoCarnetCompleta
 };
