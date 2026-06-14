@@ -53,7 +53,8 @@
 
   import {
     validarFotoPerfil,
-    validarFotoCarnet
+    validarFotoCarnet,
+    validarFotoCarnetCompleta
   } from '../servicios/imageService.js';
   
   // Stores de autenticación
@@ -308,31 +309,39 @@
   async function manejarFotoCarnet(event) {
     const archivo = event.target.files[0];
     if (!archivo) return;
+
+    // VALIDAR que foto de perfil esté subida primero
+    if (!previewFotoPerfil) {
+      errorFotoCarnet = 'Debes subir tu foto de perfil primero para comparar los rostros';
+      return;
+    }
     
     errorFotoCarnet = null;
     cargandoFotoCarnet = true;
     
     try {
-      const resultado = await validarFotoCarnet(archivo);
-      
-      if (resultado.valido) {
-        fotoCarnet = archivo;
-        previewFotoCarnet = resultado.base64;
-        errorFotoCarnet = null;
-      } else {
-        fotoCarnet = null;
-        previewFotoCarnet = null;
-        errorFotoCarnet = resultado.error;
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      errorFotoCarnet = 'Error procesando la imagen';
+    // Validar carnet comparando con foto de perfil
+    const resultado = await validarFotoCarnetCompleta(archivo, previewFotoPerfil);
+    
+    if (resultado.valido) {
+      fotoCarnet = archivo;
+      previewFotoCarnet = resultado.base64;
+      errorFotoCarnet = null;
+      console.log(`Rostros coinciden con ${resultado.similitud}% de similitud`);
+    } else {
       fotoCarnet = null;
       previewFotoCarnet = null;
-    } finally {
-      cargandoFotoCarnet = false;
+      errorFotoCarnet = resultado.error;
     }
+  } catch (error) {
+    console.error('Error:', error);
+    errorFotoCarnet = 'Error procesando la imagen';
+    fotoCarnet = null;
+    previewFotoCarnet = null;
+  } finally {
+    cargandoFotoCarnet = false;
   }
+}
 
   /**
    * Limpiar foto de perfil
@@ -597,7 +606,12 @@
 
             <!-- FOTO DE PERFIL (TODAS LAS CATEGORÍAS) -->
             <div class="campo-formulario">
-              <label for="fotoPerfil" class="ayuda-texto">Recomendación: Usa la foto que tienes en tu EEL (Expediente En Línea). Debe mostrar claramente tu rostro.</label>
+              <label for="fotoPerfil">Selecciona tu foto</label>
+              {#if datos.tipo === 'estudiante'}
+                <p class="ayuda-texto">Recomendación: Usa la foto que tienes en tu EEL (Expediente En Línea). Debe mostrar claramente tu rostro.</p>
+              {:else}
+                <p class="ayuda-texto">Debe mostrar claramente tu rostro.</p>
+              {/if}
               
               <input
                 id="fotoPerfil"
@@ -634,7 +648,7 @@
             {#if datos.tipo === 'estudiante'}
               <div class="campo-formulario">
                 <label for="fotoCarnet">Foto de Carnet Físico</label>
-                <p class="ayuda-texto">Sube una foto clara de tu carnet universitario (ambos lados si es posible).</p>
+                <p class="ayuda-texto">Sube una foto clara de tu carnet universitario.</p>
                 
                 <input
                   id="fotoCarnet"
@@ -1581,6 +1595,7 @@
     cursor: pointer;
     transition: all 0.2s;
     background: #FFF5F7;
+    margin-top: -0.5rem;
   }
 
   .entrada-archivo:hover {
@@ -1602,7 +1617,6 @@
     font-style: italic;
     display: flex;
     text-align: left;
-    
   }
 
   /* Mientras se valida */
