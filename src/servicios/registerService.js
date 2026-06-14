@@ -205,7 +205,7 @@ export async function verificarCarnetDuplicado(carnet) {
 // - Manejo perfecto de promesas (async/await)
 // - Transacciones lógicas (valida primero, luego guarda)
 // - Seguridad (hashea contraseña, verifica duplicados)
-export async function registrarUsuario(datos) {
+export async function registrarUsuario(datos, fotoPerfil = null, fotoCarnet = null) {
     try {
         // Desestructurar todos los campos posibles
         const {
@@ -403,6 +403,25 @@ export async function registrarUsuario(datos) {
 
         const db = await dbPromise;
         const idUsuario = await db.add('usuarios', nuevoUsuario);
+
+        // Guardar fotos en la tabla 'fotos'
+        if (fotoPerfil) {
+            await db.add('fotos', {
+                idUsuario: id,
+                tipo: 'perfil',
+                base64: fotoPerfil,
+                fechaSubida: new Date().toISOString()
+            });
+        }
+
+        if (fotoCarnet) {
+            await db.add('fotos', {
+                idUsuario: id,
+                tipo: 'carnet',
+                base64: fotoCarnet,
+                fechaSubida: new Date().toISOString()
+            });
+        }
 
         console.log('Usuario registrado exitosamente:', correo, 'ID:', idUsuario);
 

@@ -165,6 +165,11 @@
     datos.codigoInstitucional = '';
     datos.areaOficina = '';
     datos.descripcion = '';
+
+    // Limpiar fotos
+    limpiarFotoPerfil();
+    limpiarFotoCarnet();
+
     errores = {};
     mostrarContrasena = false;
     mostrarConfirmacion = false;
