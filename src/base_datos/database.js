@@ -63,6 +63,12 @@ export const dbPromise = openDB('encuentraUES', 1, {
             db.createObjectStore('sesiones', { keyPath: 'id', autoIncrement: true });
         }
 
+        if (!db.objectStoreNames.contains('fotos')) {
+            const storefotos = db.createObjectStore('fotos', { keyPath: 'id', autoIncrement: true });
+            storefotos.createIndex('idUsuario', 'idUsuario', { unique: false });
+            storefotos.createIndex('tipo', 'tipo', { unique: false });
+        }
+
         //OBJETOS
         if (!db.objectStoreNames.contains('objetos')) {
             const store = db.createObjectStore('objetos', {
