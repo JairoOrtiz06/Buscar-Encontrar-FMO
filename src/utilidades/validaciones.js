@@ -87,7 +87,7 @@ export function validarCorreo(correo) {
  */
 export function validarCorreoEstudiante(correo, carnet) {
     if (!carnet || !correo) {
-        return { valido: false, error: 'Correo y carnet son requeridos' };
+        return { valido: false, error: 'Correo requerido' };
     }
     
     const correoTrimmed = correo.trim().toLowerCase();
