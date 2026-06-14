@@ -48,8 +48,13 @@
     obtenerInfoCategoria,
     obtenerDepartamentos,
     obtenerCarrerasPorDepartamento,
-    CATEGORIAS_USUARIOS
+    CATEGORIAS_USUARIOS,
   } from '../servicios/registerService.js';
+
+  import {
+    validarFotoPerfil,
+    validarFotoCarnet
+  } from '../servicios/imageService.js';
   
   // Stores de autenticación
   import { 
@@ -116,6 +121,16 @@
   
   // Categorías disponibles
   let categorias = [];
+
+  // Estado para fotos
+  let fotoPerfil = null;
+  let fotoCarnet = null;
+  let previewFotoPerfil = null;
+  let previewFotoCarnet = null;
+  let errorFotoPerfil = null;
+  let errorFotoCarnet = null;
+  let cargandoFotoPerfil = false;
+  let cargandoFotoCarnet = false;
 
   // ========================================
   // CICLO DE VIDA
@@ -248,6 +263,88 @@
   // Obtener fortaleza de contraseña
   function obtenerFortaleza() {
     return obtenerFortaleaContrasena(datos.contrasena);
+  }
+
+    /**
+   * Manejar selección de foto de perfil
+   */
+  async function manejarFotoPerfil(event) {
+    const archivo = event.target.files[0];
+    if (!archivo) return;
+    
+    errorFotoPerfil = null;
+    cargandoFotoPerfil = true;
+    
+    try {
+      const resultado = await validarFotoPerfil(archivo);
+      
+      if (resultado.valido) {
+        fotoPerfil = archivo;
+        previewFotoPerfil = resultado.base64;
+        errorFotoPerfil = null;
+      } else {
+        fotoPerfil = null;
+        previewFotoPerfil = null;
+        errorFotoPerfil = resultado.error;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      errorFotoPerfil = 'Error procesando la imagen';
+      fotoPerfil = null;
+      previewFotoPerfil = null;
+    } finally {
+      cargandoFotoPerfil = false;
+    }
+  }
+
+  /**
+   * Manejar selección de foto de carnet (solo estudiantes)
+   */
+  async function manejarFotoCarnet(event) {
+    const archivo = event.target.files[0];
+    if (!archivo) return;
+    
+    errorFotoCarnet = null;
+    cargandoFotoCarnet = true;
+    
+    try {
+      const resultado = await validarFotoCarnet(archivo);
+      
+      if (resultado.valido) {
+        fotoCarnet = archivo;
+        previewFotoCarnet = resultado.base64;
+        errorFotoCarnet = null;
+      } else {
+        fotoCarnet = null;
+        previewFotoCarnet = null;
+        errorFotoCarnet = resultado.error;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      errorFotoCarnet = 'Error procesando la imagen';
+      fotoCarnet = null;
+      previewFotoCarnet = null;
+    } finally {
+      cargandoFotoCarnet = false;
+    }
+  }
+
+  /**
+   * Limpiar foto de perfil
+   */
+  function limpiarFotoPerfil() {
+    fotoPerfil = null;
+    previewFotoPerfil = null;
+    errorFotoPerfil = null;
+  }
+
+  /**
+   * Limpiar foto de carnet
+   */
+  function limpiarFotoCarnet() {
+    fotoCarnet = null;
+    previewFotoCarnet = null;
+    errorFotoCarnet = null;
   }
 
   // ========================================
@@ -475,6 +572,85 @@
                 <span class="error-mensaje">{errores.dui}</span>
               {/if}
             </div>
+          </fieldset>
+
+          <!-- SECCIÓN: FOTOS -->
+          <fieldset class="fieldset">
+            <legend>Fotos</legend>
+
+            <!-- FOTO DE PERFIL (TODAS LAS CATEGORÍAS) -->
+            <div class="campo-formulario">
+              <label for="fotoPerfil">Foto de Perfil</label>
+              <p class="ayuda-texto">Recomendación: Usa la foto que tienes en tu EEL (Expediente En Línea). Debe mostrar claramente tu rostro.</p>
+              
+              <input
+                id="fotoPerfil"
+                type="file"
+                class="entrada-archivo"
+                accept="image/jpeg,image/png"
+                on:change={manejarFotoPerfil}
+                disabled={$estaCargando || cargandoFotoPerfil}
+                required
+              />
+              
+              {#if cargandoFotoPerfil}
+                <div class="validando">
+                  <span class="spinner-pequeno"></span>
+                  Validando imagen y detectando rostro...
+                </div>
+              {/if}
+              
+              {#if errorFotoPerfil}
+                <span class="error-mensaje">{errorFotoPerfil}</span>
+              {/if}
+              
+              {#if previewFotoPerfil}
+                <div class="preview-foto">
+                  <img src={previewFotoPerfil} alt="Preview foto de perfil" />
+                  <button type="button" class="boton-limpiar" on:click={limpiarFotoPerfil} disabled={$estaCargando}>
+                    Cambiar foto
+                  </button>
+                </div>
+              {/if}
+            </div>
+
+            <!-- FOTO DE CARNET (SOLO ESTUDIANTES) -->
+            {#if datos.tipo === 'estudiante'}
+              <div class="campo-formulario">
+                <label for="fotoCarnet">Foto de Carnet Físico</label>
+                <p class="ayuda-texto">Sube una foto clara de tu carnet universitario (ambos lados si es posible).</p>
+                
+                <input
+                  id="fotoCarnet"
+                  type="file"
+                  class="entrada-archivo"
+                  accept="image/jpeg,image/png"
+                  on:change={manejarFotoCarnet}
+                  disabled={$estaCargando || cargandoFotoCarnet}
+                  required
+                />
+                
+                {#if cargandoFotoCarnet}
+                  <div class="validando">
+                    <span class="spinner-pequeno"></span>
+                    Validando imagen...
+                  </div>
+                {/if}
+                
+                {#if errorFotoCarnet}
+                  <span class="error-mensaje">{errorFotoCarnet}</span>
+                {/if}
+                
+                {#if previewFotoCarnet}
+                  <div class="preview-foto">
+                    <img src={previewFotoCarnet} alt="Preview foto de carnet" />
+                    <button type="button" class="boton-limpiar" on:click={limpiarFotoCarnet} disabled={$estaCargando}>
+                      Cambiar foto
+                    </button>
+                  </div>
+                {/if}
+              </div>
+            {/if}
           </fieldset>
 
           <!-- SECCIÓN: CAMPOS ESPECÍFICOS POR TIPO -->
@@ -1370,5 +1546,104 @@
     .entrada {
       padding: 0.75rem;
     }
+  }
+
+
+  /* ========================================
+     ESTILOS PARA INPUTS DE ARCHIVO
+     ======================================== */
+
+  .entrada-archivo {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px dashed #C41E3A;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #FFF5F7;
+  }
+
+  .entrada-archivo:hover {
+    border-color: #A01B2F;
+    background: #F5E8EB;
+  }
+
+  .entrada-archivo:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #F5F5F5;
+  }
+
+  /* Texto de ayuda/recomendación */
+  .ayuda-texto {
+    font-size: 0.85rem;
+    color: #666666;
+    margin: 0.5rem 0;
+    font-style: italic;
+  }
+
+  /* Mientras se valida */
+  .validando {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #E8F4FF;
+    border-left: 4px solid #0088CC;
+    border-radius: 4px;
+    color: #0088CC;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Spinner pequeño */
+  .spinner-pequeno {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(0, 136, 204, 0.3);
+    border-radius: 50%;
+    border-top-color: #0088CC;
+    animation: girar 0.8s linear infinite;
+  }
+
+  /* Preview de foto */
+  .preview-foto {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .preview-foto img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    border: 2px solid #C41E3A;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+
+  /* Botón para limpiar/cambiar foto */
+  .boton-limpiar {
+    padding: 0.5rem 1rem;
+    background: #F5E8EB;
+    color: #C41E3A;
+    border: 1px solid #C41E3A;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .boton-limpiar:hover:not(:disabled) {
+    background: #C41E3A;
+    color: white;
+  }
+
+  .boton-limpiar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 </style>
