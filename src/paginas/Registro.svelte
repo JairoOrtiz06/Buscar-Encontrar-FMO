@@ -385,12 +385,24 @@
       return;
     }
 
+    // Validar que foto de perfil esté subida (TODAS las categorías)
+    if (!previewFotoPerfil) {
+      establecerError('Debes subir una foto de perfil');
+      return;
+    }
+
+    // Validar que foto de carnet esté subida (SOLO estudiantes)
+    if (datos.tipo === 'estudiante' && !previewFotoCarnet) {
+      establecerError('Debes subir una foto de tu carnet');
+      return;
+    }
+
     // Indicar que está cargando
     establecerCargando(true);
 
     try {
       // Llamar servicio de registro
-      const resultado = await registrarUsuario(datos);
+      const resultado = await registrarUsuario(datos, previewFotoPerfil, previewFotoCarnet);
 
       if (resultado.exito) {
         // Registro exitoso
@@ -576,12 +588,11 @@
 
           <!-- SECCIÓN: FOTOS -->
           <fieldset class="fieldset">
-            <legend>Fotos</legend>
+            <legend>Foto de Perfil</legend>
 
             <!-- FOTO DE PERFIL (TODAS LAS CATEGORÍAS) -->
             <div class="campo-formulario">
-              <label for="fotoPerfil">Foto de Perfil</label>
-              <p class="ayuda-texto">Recomendación: Usa la foto que tienes en tu EEL (Expediente En Línea). Debe mostrar claramente tu rostro.</p>
+              <label for="fotoPerfil" class="ayuda-texto">Recomendación: Usa la foto que tienes en tu EEL (Expediente En Línea). Debe mostrar claramente tu rostro.</label>
               
               <input
                 id="fotoPerfil"
@@ -1243,6 +1254,8 @@
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--texto);
+    display: flex;
+    padding-left: 5px;
   }
 
   .etiqueta-con-toggle {
@@ -1582,6 +1595,9 @@
     color: #666666;
     margin: 0.5rem 0;
     font-style: italic;
+    display: flex;
+    text-align: left;
+    
   }
 
   /* Mientras se valida */
