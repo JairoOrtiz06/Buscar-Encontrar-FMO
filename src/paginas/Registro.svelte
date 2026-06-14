@@ -656,7 +656,8 @@
                   class="entrada-archivo"
                   accept="image/jpeg,image/png"
                   on:change={manejarFotoCarnet}
-                  disabled={$estaCargando || cargandoFotoCarnet}
+                  disabled={!previewFotoPerfil || $estaCargando || cargandoFotoCarnet}
+                  placeholder={!previewFotoPerfil ? 'Primero sube tu foto de perfil' : ''}
                   required
                 />
                 
