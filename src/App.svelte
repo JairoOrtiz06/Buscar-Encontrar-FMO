@@ -17,108 +17,60 @@
 -->
 
 <script>
-  // ========================================
-  // IMPORTACIONES
-  // ========================================
-  
-  import { onMount } from 'svelte';
-  import { paginaActual } from './stores/navegacionStore.js';
-  
-  // Componentes de páginas
-  import Login from './paginas/Login.svelte';
-  import Registro from './paginas/Registro.svelte';
-  import Inicio from './paginas/Inicio.svelte';
-  
-  // Stores de autenticación
-  import { 
-    restaurarSesionDesdeStorage,
-    estaLogueado
-  } from './stores/authStore.js';
 
-  // ========================================
-  // CICLO DE VIDA: RESTAURAR SESIÓN
-  // ========================================
-  
-  // Se ejecuta cuando la app monta en el DOM
-  // Restaura la sesión si el usuario recarga la página
-  import { crearAdminPorDefecto } from './base_datos/database.js';
-
-  onMount(async () => {
-    console.log('App montada - restaurando sesión...');
-    await crearAdminPorDefecto();
-    await restaurarSesionDesdeStorage();
-  });
+    import VerHistorial from './paginas/VerHistorial.svelte';
 </script>
 
-<!-- ========================================
-     ENRUTAMIENTO: MOSTRAR COMPONENTE SEGÚN ESTADO
-     ======================================== -->
+<VerHistorial />
 
-<!-- Si usuario está logueado: mostrar Inicio -->
+    import BuscarObjeto from './paginas/BuscarObjeto.svelte';
+    import Reclamos from './paginas/Reclamos.svelte';
 
-{#if $estaLogueado}
-  <Inicio />
-{:else if $paginaActual === 'login'}
-  <Login />
-{:else if $paginaActual === 'registro'}
-  <Registro />
+    let pagina = "buscar";
+    let objetoSeleccionado = null;
+
+    function reclamarObjeto(objeto) {
+        objetoSeleccionado = objeto;
+        pagina = "reclamos";
+    }
+</script>
+
+<nav>
+    <button on:click={() => pagina = "buscar"}>
+        Buscar Objetos
+    </button>
+
+    <button on:click={() => pagina = "reclamos"}>
+        Reclamos
+    </button>
+</nav>
+
+{#if pagina === "buscar"}
+    <BuscarObjeto reclamarObjeto={reclamarObjeto} />
+{:else if pagina === "reclamos"}
+    <Reclamos objeto={objetoSeleccionado} />
 {/if}
 
-<!-- ========================================
-     ESTILOS GLOBALES
-     ======================================== -->
-
 <style>
-  /* Resetear estilos del navegador */
-  :global(*) {
-    box-sizing: border-box;
-  }
+    nav {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
 
-  :global(body) {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f8f9fa;
-    color: #212529;
-    line-height: 1.5;
-  }
+    nav button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
 
-  :global(html, body, #app) {
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Estilos para inputs y select */
-  :global(input, select, textarea, button) {
-    font-family: inherit;
-    font-size: inherit;
-  }
-
-  /* Remover estilos por defecto de inputs */
-  :global(input::-webkit-outer-spin-button),
-  :global(input::-webkit-inner-spin-button) {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  /* Estilos para links */
-  :global(a) {
-    color: #0088CC;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  :global(a:hover) {
-    color: #006BA3;
-  }
-
-  /* Estilos para botones */
-  :global(button) {
-    transition: all 0.3s;
-  }
-
-  /* Scroll smooth */
-  :global(html) {
-    scroll-behavior: smooth;
-  }
+    nav button:hover {
+        background: #1d4ed8;
+    }
 </style>
+
