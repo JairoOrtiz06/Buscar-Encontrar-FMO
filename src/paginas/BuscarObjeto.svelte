@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   export let reclamarObjeto;
 
   import { onMount } from "svelte";
@@ -6,7 +6,7 @@
 
   let busqueda = "";
   let categoria = "Todas";
-  let objetos = [];
+  let objetos: any[] = [];
 
   async function cargarObjetos() {
     const db = await dbPromise;
