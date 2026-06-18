@@ -550,7 +550,7 @@
                 bind:value={datos.correo}
                 on:blur={() => validarCampo('correo')}
                 disabled={$estaCargando}
-                pattern="[a-zA-Z0-9._-]+@ues\.edu\.sv"
+    
                 required
               />
               {#if errores.correo}
@@ -1293,6 +1293,7 @@
     font-family: inherit;
     transition: all 0.2s;
     background: white;
+    color: var(--texto);
   }
 
   .entrada:focus {
@@ -1330,6 +1331,7 @@
     background: white;
     cursor: pointer;
     transition: all 0.2s;
+    color: var(--texto);
   }
 
   select:focus {

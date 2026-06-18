@@ -79,6 +79,7 @@ export function validarCorreo(correo) {
     }
     
     return { valido: true, error: null };
+    
 }
 
 /**
@@ -95,6 +96,10 @@ export function validarCorreoEstudiante(correo, carnet) {
     
     // Extraer la parte local del correo (antes del @)
     const parteLocalCorreo = correoTrimmed.split('@')[0];
+    console.log('Correo completo:', correo);
+console.log('Carnet completo:', carnet);
+console.log('Parte local:', parteLocalCorreo);
+console.log('Carnet normalizado:', carnetTrimmed);
     
     // El correo debe empezar con el carnet en minúscula
     if (parteLocalCorreo !== carnetTrimmed) {

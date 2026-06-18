@@ -28,6 +28,7 @@ function generarToken() {
     return 'token_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
 }
 
+
 // LOGIN - Autenticar usuario con correo y contraseña
 // Devuelve: { exito, usuario, token, mensaje }
 export async function login(correo, contrasena) {
@@ -240,3 +241,4 @@ export default {
     verificarSesion,
     obtenerUsuario
 };
+

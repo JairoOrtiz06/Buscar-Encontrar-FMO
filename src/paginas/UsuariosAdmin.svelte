@@ -1,27 +1,15 @@
 <script lang="ts">
     let pestaña = "usuarios";
 
-    let usuariosPendientes = [
-        { id: 1, nombre: "Juan Pérez", correo: "jperez@ues.edu.sv", carnet: "SM23001", fotoCarnet: "/carnet.jpeg" },
-        { id: 2, nombre: "Ana Martínez", correo: "amartinez@ues.edu.sv", carnet: "SM23002", fotoCarnet: "/svelte.svg" }
-    ];
-    let usuariosAprobados = [
-        {
-            id: 101,
-            nombre: "Carlos Gómez",
-            correo: "cgomez@ues.edu.sv",
-            carnet: "SM22001",
-            estado: "Activo"
-        },
-        {
-            id: 102,
-            nombre: "María Pérez",
-            correo: "mperez@ues.edu.sv",
-            carnet: "SM22002",
-            estado: "Activo"
-        }
-    
-    ];
+    import { dbPromise } from '../base_datos/database.js';
+    import { onMount } from 'svelte';
+
+    let usuarios: any[] = [];
+
+    onMount(async () => {
+        const db = await dbPromise;
+        usuarios = await db.getAll('usuarios');
+    });
     let mostrarEditar = false;
     let usuarioEditando: any = null;
 
@@ -30,40 +18,47 @@
     let imagenSeleccionada = "";
     let notificacion = "";
 
-   function aprobarUsuario(id:number) {
+   async function aprobarUsuario(id:number) {
 
-    const usuario = usuariosPendientes.find(
+    const db = await dbPromise;
+
+    const usuario = usuarios.find(
         u => u.id === id
     );
 
-    if (usuario) {
+    if (!usuario) return;
 
-        usuariosAprobados = [
-            ...usuariosAprobados,
-            {
-                ...usuario,
-                estado: "Activo"
-            }
-        ];
+    usuario.validado = true;
+    usuario.estado = 'aprobado';
 
-        usuariosPendientes =
-            usuariosPendientes.filter(
-                u => u.id !== id
-            );
+    await db.put('usuarios', usuario);
+
+    usuarios = await db.getAll('usuarios');
+
+    mostrarNotificacion(
+        '✅ Usuario aprobado'
+    );
+    }
+
+    async function rechazarUsuario(id:number) {
+
+        const db = await dbPromise;
+
+        const usuario = usuarios.find(
+            u => u.id === id
+        );
+
+        if (!usuario) return;
+
+        usuario.estado = 'rechazado';
+
+        await db.put('usuarios', usuario);
+
+        usuarios = await db.getAll('usuarios');
 
         mostrarNotificacion(
-            "✅ Usuario aprobado"
+            '❌ Usuario rechazado'
         );
-    }
-}
-
-    function rechazarUsuario(id: number) {
-        usuariosPendientes =
-            usuariosPendientes.filter(
-                usuario => usuario.id !== id
-            );
-
-        mostrarNotificacion("❌ Usuario rechazado");
     }
 
     function mostrarNotificacion(mensaje: string) {
@@ -74,62 +69,48 @@
         }, 3000);
     }
 
-    function desactivarUsuario(id:number) {
+   async function desactivarUsuario(id:number) {
 
-        usuariosAprobados =
-            usuariosAprobados.map(usuario => {
+        const db = await dbPromise;
 
-                if (usuario.id === id) {
+        const usuario = usuarios.find(
+            u => u.id === id
+        );
 
-                    return {
-                        ...usuario,
-                        estado:
-                            usuario.estado === "Activo"
-                                ? "Inactivo"
-                                : "Activo"
-                    };
-                }
+        if (!usuario) return;
 
-                return usuario;
-            });
+        usuario.estado =
+            usuario.estado === 'Activo'
+                ? 'Inactivo'
+                : 'Activo';
+
+        await db.put('usuarios', usuario);
+
+        usuarios = await db.getAll('usuarios');
 
         mostrarNotificacion(
-            "🔄 Estado actualizado"
+            '🔄 Estado actualizado'
         );
     }
 
-    function eliminarUsuario(id: number) {
-
-        usuariosAprobados =
-            usuariosAprobados.filter(
-                usuario => usuario.id !== id
-            );
-
-        mostrarNotificacion(
-            "🗑️ Usuario eliminado"
-        );
-    }
     function editarUsuario(usuario: any) {
     usuarioEditando = { ...usuario };
     mostrarEditar = true;}
 
-    function guardarEdicion() {
+    async function guardarEdicion() {
 
-    usuariosAprobados =
-        usuariosAprobados.map(usuario =>
+        const db = await dbPromise;
 
-            usuario.id === usuarioEditando.id
-                ? usuarioEditando
-                : usuario
+        await db.put('usuarios', usuarioEditando);
 
+        usuarios = await db.getAll('usuarios');
+
+        mostrarEditar = false;
+
+        mostrarNotificacion(
+            "✏️ Usuario actualizado"
         );
-
-    mostrarEditar = false;
-
-    mostrarNotificacion(
-        "✏️ Usuario actualizado"
-    );
-}
+    }
 </script>
 
 
@@ -142,7 +123,7 @@
 <h2>Aprobar Registros</h2>
 
 <div class="contenedor-cards">
-    {#each usuariosPendientes as usuario}
+    {#each usuarios as usuario}
     <div class="card">
         <h3>{usuario.nombre}</h3>
         <p><strong>Correo:</strong> {usuario.correo}</p>
@@ -248,7 +229,7 @@
 
     <tbody>
 
-        {#each usuariosAprobados.filter(
+        {#each usuarios.filter(
             usuario =>
                 usuario.nombre
                     .toLowerCase()
@@ -298,13 +279,7 @@
                         Editar
                     </button>
 
-                    <button
-                        class="rechazar"
-                        on:click={() =>
-                            eliminarUsuario(usuario.id)}
-                    >
-                        Eliminar
-                    </button>
+                    
 
                 </div>
 

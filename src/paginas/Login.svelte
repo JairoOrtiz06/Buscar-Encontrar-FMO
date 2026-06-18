@@ -172,7 +172,12 @@
         // Login exitoso: guardar usuario y token en stores + localStorage
         establecerUsuarioAutenticado(resultado.usuario, resultado.token);
         console.log('Login exitoso');
-        
+      if (usuario.estado === 'inactivo') {
+        return {
+            exito: false,
+            mensaje: 'Tu cuenta ha sido desactivada'
+        };
+}
       } else {
         // Login falló: mostrar mensaje de error
         establecerError(resultado.mensaje);
@@ -349,7 +354,7 @@
     --exito: #28a745;
     --fondo: #FFFFFF;
     --borde: #E0E0E0;
-    --texto: #333333;
+    --texto: #141212;
     --texto-secundario: #666666;
     --blanco: #FFFFFF;
     --sombra-md: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -521,6 +526,7 @@
     font-family: inherit;
     transition: all 0.2s;
     background: white;
+    color:var(--texto);
   }
 
   .entrada:focus {

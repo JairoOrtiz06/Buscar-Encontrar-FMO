@@ -7,7 +7,15 @@
 
     import EstadisticasAdmin from './EstadisticasAdmin.svelte';
 
-    let pestaña = "usuarios";
+
+     import { logout } from '../stores/authStore.js';
+    import { irA } from '../stores/navegacionStore.js';
+
+    function cerrarSesion() {
+        logout();
+        irA('login');
+    }
+        let pestaña = "usuarios";
 </script>
 <div class="header-admin">
 
@@ -21,27 +29,32 @@
         <button
             class:activo={pestaña === "usuarios"}
             on:click={() => pestaña = "usuarios"}>
-            👤 Usuarios
+            Usuarios
         </button>
 
         <button
             class:activo={pestaña === "objetos"}
             on:click={() => pestaña = "objetos"}>
-            📦 Objetos
+            Objetos
         </button>
 
         <button
             class:activo={pestaña === "reclamos"}
             on:click={() => pestaña = "reclamos"}>
-            📋 Reclamos
+            Reclamos
         </button>
 
         <button
             class:activo={pestaña === "estadisticas"}
             on:click={() => pestaña = "estadisticas"}>
-            📊 Estadísticas
+             Estadísticas
         </button>
 
+    </div>
+    <div class="acciones-admin">
+        <button class="btn-salir" on:click={cerrarSesion}>
+            Cerrar sesión
+        </button>
     </div>
 
 </div>
@@ -121,6 +134,26 @@
     background: white;
     color: #b30000;
     font-weight: bold;
+}
+.acciones-admin {
+    display: flex;
+    align-items: center;
+}
+
+.btn-salir {
+    background: white;
+    color: #b30000;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .3s;
+}
+
+.btn-salir:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
 @media (max-width: 900px) {
 

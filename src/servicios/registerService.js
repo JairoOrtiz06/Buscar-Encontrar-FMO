@@ -407,7 +407,7 @@ export async function registrarUsuario(datos, fotoPerfil = null, fotoCarnet = nu
         // Guardar fotos en la tabla 'fotos'
         if (fotoPerfil) {
             await db.add('fotos', {
-                idUsuario: id,
+                idUsuario: idUsuario,
                 tipo: 'perfil',
                 base64: fotoPerfil,
                 fechaSubida: new Date().toISOString()
@@ -416,7 +416,7 @@ export async function registrarUsuario(datos, fotoPerfil = null, fotoCarnet = nu
 
         if (fotoCarnet) {
             await db.add('fotos', {
-                idUsuario: id,
+                idUsuario: idUsuario,
                 tipo: 'carnet',
                 base64: fotoCarnet,
                 fechaSubida: new Date().toISOString()
