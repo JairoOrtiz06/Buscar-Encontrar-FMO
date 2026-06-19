@@ -1,21 +1,50 @@
 <script>
   import { usuarioActual, logout } from '../stores/authStore.js';
+  import { irA } from '../stores/navegacionStore.js';
 </script>
 
 <main class="contenedor-inicio">
   <header class="encabezado">
     <h1>Encuentra UES-FMO</h1>
     <nav class="navbar">
-      <a href="#inicio">Inicio</a>
-      <a href="#publicar">Publicar Objeto</a>
-      <a href="#buscar">Buscar Objeto</a>
-      <div class="usuario-info">
-        <span>Bienvenido, {$usuarioActual.nombre}</span>
-        <button on:click={() => { logout(); window.location.href = '/login'; }}>
-          Logout
+
+        <button on:click={() => irA('inicio')}>
+          🏠 Inicio
         </button>
-      </div>
-    </nav>
+
+        <button on:click={() => irA('publicar')}>
+          📦 Publicar Objeto
+        </button>
+
+        <button on:click={() => irA('buscar')}>
+          🔍 Buscar Objeto
+        </button>
+
+        <button on:click={() => irA('historial')}>
+          📋 Mi Historial
+        </button>
+        <button on:click={() => irA('reclamos')}>
+          📢 Reclamos
+        </button>
+
+        <div class="usuario-info">
+
+          <span>
+            Bienvenido, {$usuarioActual.nombre}
+          </span>
+
+          <button
+            on:click={() => {
+              logout();
+              irA('login');
+            }}
+          >
+            🚪 Salir
+          </button>
+
+        </div>
+
+      </nav>
   </header>
 
   <section class="contenido">

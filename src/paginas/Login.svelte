@@ -177,6 +177,16 @@
             exito: false,
             mensaje: 'Tu cuenta ha sido desactivada'
         };
+
+      if (resultado.exito) {
+
+        establecerUsuarioAutenticado(
+            resultado.usuario,
+            resultado.token
+        );
+
+    irA('inicio');
+}
 }
       } else {
         // Login falló: mostrar mensaje de error

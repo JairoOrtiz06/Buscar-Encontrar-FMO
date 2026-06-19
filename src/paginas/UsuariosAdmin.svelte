@@ -5,11 +5,34 @@
     import { onMount } from 'svelte';
 
     let usuarios: any[] = [];
+    let carnets: Record<number, string> = {};
 
-    onMount(async () => {
-        const db = await dbPromise;
-        usuarios = await db.getAll('usuarios');
+    let usuariosPendientes: any[] = [];
+    let usuariosAprobados: any[] = [];
+    async function cargarUsuarios() {
+
+    const db = await dbPromise;
+
+    const todos = await db.getAll('usuarios');
+
+        usuariosPendientes = todos.filter(
+            usuario =>
+                usuario.tipo !== 'admin' &&
+                usuario.estado === 'pendiente'
+        );
+
+        usuariosAprobados = todos.filter(
+            usuario =>
+                usuario.tipo !== 'admin' &&
+                usuario.estado === 'aprobado'
+        );
+    }
+
+    
+   onMount(async () => {
+        await cargarUsuarios();
     });
+  
     let mostrarEditar = false;
     let usuarioEditando: any = null;
 
@@ -20,25 +43,39 @@
 
    async function aprobarUsuario(id:number) {
 
+        const db = await dbPromise;
+
+        const usuario = usuarios.find(
+            u => u.id === id
+        );
+
+        if (!usuario) return;
+
+        usuario.validado = true;
+        usuario.estado = 'aprobado';
+
+        await db.put('usuarios', usuario);
+
+        await cargarUsuarios();
+
+        mostrarNotificacion(
+            '✅ Usuario aprobado'
+        );
+    }
+
+    async function obtenerFotoPerfil(idUsuario:number) {
     const db = await dbPromise;
 
-    const usuario = usuarios.find(
-        u => u.id === id
+    const fotos = await db.getAllFromIndex(
+        'fotos',
+        'idUsuario',
+        idUsuario
     );
 
-    if (!usuario) return;
-
-    usuario.validado = true;
-    usuario.estado = 'aprobado';
-
-    await db.put('usuarios', usuario);
-
-    usuarios = await db.getAll('usuarios');
-
-    mostrarNotificacion(
-        '✅ Usuario aprobado'
+    return fotos.find(
+        foto => foto.tipo === 'perfil'
     );
-    }
+}
 
     async function rechazarUsuario(id:number) {
 
@@ -54,7 +91,7 @@
 
         await db.put('usuarios', usuario);
 
-        usuarios = await db.getAll('usuarios');
+        await cargarUsuarios();
 
         mostrarNotificacion(
             '❌ Usuario rechazado'
@@ -103,7 +140,7 @@
 
         await db.put('usuarios', usuarioEditando);
 
-        usuarios = await db.getAll('usuarios');
+        await cargarUsuarios();
 
         mostrarEditar = false;
 
@@ -129,16 +166,18 @@
         <p><strong>Correo:</strong> {usuario.correo}</p>
         <p><strong>Carnet:</strong> {usuario.carnet}</p>
 
-        <img
-            src={usuario.fotoCarnet}
-            alt="Carnet"
-            width="120"
-            on:click={() => imagenSeleccionada = usuario.fotoCarnet}
-        />
+        {#if carnets[usuario.id]}
+            <img
+                src={carnets[usuario.id]}
+                alt="Carnet"
+                class="foto-carnet"
+            />
+        {:else}
+            <p>Sin carnet</p>
+        {/if}
 
         <br>
         <button on:click={() => aprobarUsuario(usuario.id)}>Aprobar</button>
-        <button on:click={() => mostrarNotificacion("ℹ️ Observación registrada")}>Observación</button>
         <button on:click={() => rechazarUsuario(usuario.id)}>Rechazar</button>
     </div>
 {/each}
@@ -229,7 +268,7 @@
 
     <tbody>
 
-        {#each usuarios.filter(
+        {#each usuariosAprobados.filter(
             usuario =>
                 usuario.nombre
                     .toLowerCase()
@@ -247,7 +286,7 @@
             <td>
 
                 <span
-                    class={usuario.estado === "Activo"
+                    class={usuario.estado === "aprobado"
                         ? "activo"
                         : "inactivo"}>
 
@@ -332,7 +371,7 @@
     transform: translateY(-8px);
     box-shadow: 0 15px 35px rgba(0,0,0,0.15);
 }
-.card img {
+.foto-carnet {
     width: 100%;
     max-height: 180px;
     object-fit: cover;

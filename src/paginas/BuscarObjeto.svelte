@@ -34,7 +34,7 @@
     return coincideNombre && coincideCategoria;
   });
 </script>
-
+<div class="debug"></div>
 <h1>Buscar Objetos</h1>
 
 <div class="filtros">
@@ -163,6 +163,7 @@
     margin: 10px 15px;
     font-size: 16px;
   }
+  
 
   button {
     margin-top: 15px;

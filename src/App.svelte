@@ -11,6 +11,10 @@
   import Registro from './paginas/Registro.svelte';
   import Inicio from './paginas/Inicio.svelte';
   import Administracion from './paginas/Administracion.svelte';
+  import PublicarObjeto from './paginas/PublicarObjeto.svelte';
+  import BuscarObjeto from './paginas/BuscarObjeto.svelte';
+  import VerHistorial from './paginas/VerHistorial.svelte';
+  import Reclamos from './paginas/Reclamos.svelte';
   
   // Stores de autenticación
   import { 
@@ -39,24 +43,49 @@
      ======================================== -->
 
 <!-- Si usuario está logueado: mostrar Inicio -->
-
 {#if $estaLogueado}
 
   {#if $usuarioActual?.tipo === 'admin'}
+
     <Administracion />
-  {:else}
+
+  {:else if $paginaActual === 'inicio'}
+
     <Inicio />
+
+  {:else if $paginaActual === 'publicar'}
+
+    <PublicarObjeto />
+
+  {:else if $paginaActual === 'buscar'}
+
+    <BuscarObjeto />
+
+  {:else if $paginaActual === 'historial'}
+
+    <VerHistorial />
+  {:else if $paginaActual === 'reclamos'}
+
+  <Reclamos />
+
+{:else if $paginaActual === 'historial'}
+
+  <VerHistorial />
+  {:else}
+
+    <Inicio />
+
   {/if}
 
 {:else if $paginaActual === 'login'}
+
   <Login />
 
 {:else if $paginaActual === 'registro'}
+
   <Registro />
-  
 
 {/if}
-
 
 <!-- ========================================
      ESTILOS GLOBALES
@@ -72,16 +101,10 @@
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f8f9fa;
+    background: #346ea7;
     color: #212529;
     line-height: 1.5;
   }
-
-  :global(html, body, #app) {
-    width: 100%;
-    height: 100%;
-  }
-
   /* Estilos para inputs y select */
   :global(input, select, textarea, button) {
     font-family: inherit;
