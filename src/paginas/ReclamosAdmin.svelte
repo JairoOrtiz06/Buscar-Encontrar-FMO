@@ -1,130 +1,277 @@
 <script lang="ts">
-    let reclamosPendientes = [
-    {
-        id: 1,
-        objeto: "Calculadora Casio",
-        solicitante: "Carlos Gómez",
-        correo: "cgomez@ues.edu.sv",
-        descripcion:
-            "La calculadora tiene una pegatina azul con mis iniciales.",
-        fecha: "2026-06-12"
-    },
-    {
-        id: 2,
-        objeto: "USB Kingston",
-        solicitante: "María Pérez",
-        correo: "mperez@ues.edu.sv",
-        descripcion:
-            "Tiene una cinta roja en el extremo.",
-        fecha: "2026-06-13"
-    }];
+    import { onMount } from 'svelte';
+    import { dbPromise } from '../base_datos/database.js';
 
+    let notificacion = "";
+
+    let reclamosPendientes: any[] = [];
     let reclamosAprobados: any[] = [];
+    let reclamosRechazados: any[] = [];
 
-    function aprobarReclamo(id: number) {
+    onMount(async () => {
+        await cargarReclamos();
+    });
 
-    const reclamo =
-        reclamosPendientes.find(
-            r => r.id === id
+    async function cargarReclamos() {
+
+        const db = await dbPromise;
+
+        const tx = db.transaction(
+            'reclamos',
+            'readonly'
         );
 
-    if (reclamo) {
+        const store =
+            tx.objectStore('reclamos');
 
-        reclamosAprobados = [
-            ...reclamosAprobados,
-            reclamo
-        ];
+        const todos =
+            await store.getAll();
 
         reclamosPendientes =
-            reclamosPendientes.filter(
-                r => r.id !== id
+            todos.filter(
+                r => r.estado === "pendiente"
+            );
+
+        reclamosAprobados =
+            todos.filter(
+                r => r.estado === "aprobado"
+            );
+
+        reclamosRechazados =
+            todos.filter(
+                r => r.estado === "rechazado"
             );
     }
-    }
-    function rechazarReclamo(id: number) {
 
-    reclamosPendientes =
-        reclamosPendientes.filter(
-            r => r.id !== id
+    async function aprobarReclamo(
+        id: number
+    ) {
+
+        const db = await dbPromise;
+
+        const tx = db.transaction(
+            'reclamos',
+            'readwrite'
         );
-}
+
+        const store =
+            tx.objectStore('reclamos');
+
+        const reclamo =
+            await store.get(id);
+
+        if (!reclamo) return;
+
+        reclamo.estado =
+            "aprobado";
+
+        await store.put(reclamo);
+
+        await cargarReclamos();
+
+        mostrarNotificacion(
+            "Reclamo aprobado"
+        );
+    }
+
+    async function rechazarReclamo(
+        id: number
+    ) {
+
+        const db = await dbPromise;
+
+        const tx = db.transaction(
+            'reclamos',
+            'readwrite'
+        );
+
+        const store =
+            tx.objectStore('reclamos');
+
+        const reclamo =
+            await store.get(id);
+
+        if (!reclamo) return;
+
+        reclamo.estado =
+            "rechazado";
+
+        await store.put(reclamo);
+
+        await cargarReclamos();
+
+        mostrarNotificacion(
+            "Reclamo rechazado"
+        );
+    }
+
+    function mostrarNotificacion(
+        mensaje: string
+    ) {
+
+        notificacion = mensaje;
+
+        setTimeout(() => {
+            notificacion = "";
+        }, 3000);
+    }
+
+    function formatearFecha(
+        fecha: string
+    ) {
+
+        if (!fecha)
+            return "Sin fecha";
+
+        return new Date(
+            fecha
+        ).toLocaleDateString();
+    }
 </script>
+
+{#if notificacion}
+    <div class="notificacion">
+        {notificacion}
+    </div>
+{/if}
+
 <h2>📋 Reclamos Pendientes</h2>
 
 <div class="contenedor-cards">
 
-{#each reclamosPendientes as reclamo}
+{#if reclamosPendientes.length > 0}
 
-<div class="card">
+    {#each reclamosPendientes as reclamo}
 
-    <h3>{reclamo.objeto}</h3>
+        <div class="card">
+
+            <h3>
+                Reclamo #{reclamo.id}
+            </h3>
+
+            <p>
+                <strong>ID Objeto:</strong>
+                {reclamo.idObjeto}
+            </p>
+
+            <p>
+                <strong>ID Solicitante:</strong>
+                {reclamo.idSolicitante}
+            </p>
+
+            <p>
+                <strong>Estado:</strong>
+                {reclamo.estado}
+            </p>
+
+            <p>
+                <strong>Fecha:</strong>
+                {formatearFecha(
+                    reclamo.fechaSolicitud
+                )}
+            </p>
+
+            <div class="acciones">
+
+                <button
+                    class="aprobar"
+                    on:click={() =>
+                        aprobarReclamo(
+                            reclamo.id
+                        )}
+                >
+                    Aprobar
+                </button>
+
+                <button
+                    class="rechazar"
+                    on:click={() =>
+                        rechazarReclamo(
+                            reclamo.id
+                        )}
+                >
+                    Rechazar
+                </button>
+
+            </div>
+
+        </div>
+
+    {/each}
+
+{:else}
 
     <p>
-        <strong>Solicitante:</strong>
-        {reclamo.solicitante}
+        No hay reclamos pendientes.
     </p>
 
-    <p>
-        <strong>Correo:</strong>
-        {reclamo.correo}
-    </p>
-
-    <p>
-        <strong>Descripción:</strong>
-        {reclamo.descripcion}
-    </p>
-
-    <p>
-        <strong>Fecha:</strong>
-        {reclamo.fecha}
-    </p>
-
-    <div class="acciones">
-
-        <button
-            class="aprobar"
-            on:click={() =>
-                aprobarReclamo(reclamo.id)}>
-
-            Aprobar
-
-        </button>
-
-        <button
-            class="rechazar"
-            on:click={() =>
-                rechazarReclamo(reclamo.id)}>
-
-            Rechazar
-
-        </button>
-
-    </div>
+{/if}
 
 </div>
 
-{/each}
-
-</div>
 <h2>✅ Reclamos Aprobados</h2>
 
 <div class="contenedor-cards">
 
 {#each reclamosAprobados as reclamo}
 
-<div class="card card-aprobada">
+    <div class="card card-aprobada">
 
-    <h3>{reclamo.objeto}</h3>
+        <h3>
+            Reclamo #{reclamo.id}
+        </h3>
 
-    <p>
-        {reclamo.solicitante}
-    </p>
+        <p>
+            ID Objeto:
+            {reclamo.idObjeto}
+        </p>
 
-    <span class="estado-aprobado">
-        ✓ Entrega Autorizada
-    </span>
+        <p>
+            ID Solicitante:
+            {reclamo.idSolicitante}
+        </p>
+
+        <span
+            class="estado-aprobado"
+        >
+            ✓ Aprobado
+        </span>
+
+    </div>
+
+{/each}
 
 </div>
+
+<h2>❌ Reclamos Rechazados</h2>
+
+<div class="contenedor-cards">
+
+{#each reclamosRechazados as reclamo}
+
+    <div class="card card-rechazada">
+
+        <h3>
+            Reclamo #{reclamo.id}
+        </h3>
+
+        <p>
+            ID Objeto:
+            {reclamo.idObjeto}
+        </p>
+
+        <p>
+            ID Solicitante:
+            {reclamo.idSolicitante}
+        </p>
+
+        <span
+            class="estado-rechazado"
+        >
+            ✕ Rechazado
+        </span>
+
+    </div>
 
 {/each}
 

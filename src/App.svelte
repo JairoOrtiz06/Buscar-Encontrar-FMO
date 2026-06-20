@@ -43,6 +43,7 @@
      ======================================== -->
 
 <!-- Si usuario está logueado: mostrar Inicio -->
+
 {#if $estaLogueado}
 
   {#if $usuarioActual?.tipo === 'admin'}
@@ -77,13 +78,13 @@
 
   {/if}
 
-{:else if $paginaActual === 'login'}
-
-  <Login />
-
 {:else if $paginaActual === 'registro'}
 
   <Registro />
+
+{:else}
+
+  <Login />
 
 {/if}
 

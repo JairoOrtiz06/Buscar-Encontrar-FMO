@@ -1,194 +1,69 @@
 <script>
     import UsuariosAdmin from "./UsuariosAdmin.svelte";
-
     import ObjetosAdmin from "./ObjetosAdmin.svelte";
-
     import ReclamosAdmin from "./ReclamosAdmin.svelte";
-
     import EstadisticasAdmin from './EstadisticasAdmin.svelte';
 
-
-     import { logout } from '../stores/authStore.js';
+    import { logout } from '../stores/authStore.js';
     import { irA } from '../stores/navegacionStore.js';
 
     function cerrarSesion() {
         logout();
         irA('login');
     }
-        let pestaña = "usuarios";
+
+    let pestaña = "usuarios";
 </script>
-<div class="header-admin">
 
-    <div class="titulo">
-        <h1>Encuentra UES-FMO</h1>
-        <p>Panel de Administración</p>
-    </div>
+<div class="container bg-danger bg-gradient text-white p-4 rounded shadow mb-4">
 
-    <div class="tabs">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3">
+
+        <div class="text-center text-lg-start">
+            <h1 class="mb-1">Encuentra UES-FMO</h1>
+            <p class="mb-0">Panel de Administración</p>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <button
+                class="btn {pestaña === 'usuarios' ? 'btn-light text-danger fw-bold' : 'btn-outline-light'}"
+                on:click={() => pestaña = "usuarios"}>
+                Usuarios
+            </button>
+
+            <button
+                class="btn {pestaña === 'objetos' ? 'btn-light text-danger fw-bold' : 'btn-outline-light'}"
+                on:click={() => pestaña = "objetos"}>
+                Objetos
+            </button>
+
+            <button
+                class="btn {pestaña === 'reclamos' ? 'btn-light text-danger fw-bold' : 'btn-outline-light'}"
+                on:click={() => pestaña = "reclamos"}>
+                Reclamos
+            </button>
+
+            <button
+                class="btn {pestaña === 'estadisticas' ? 'btn-light text-danger fw-bold' : 'btn-outline-light'}"
+                on:click={() => pestaña = "estadisticas"}>
+                Estadísticas
+            </button>
+        </div>
 
         <button
-            class:activo={pestaña === "usuarios"}
-            on:click={() => pestaña = "usuarios"}>
-            Usuarios
-        </button>
-
-        <button
-            class:activo={pestaña === "objetos"}
-            on:click={() => pestaña = "objetos"}>
-            Objetos
-        </button>
-
-        <button
-            class:activo={pestaña === "reclamos"}
-            on:click={() => pestaña = "reclamos"}>
-            Reclamos
-        </button>
-
-        <button
-            class:activo={pestaña === "estadisticas"}
-            on:click={() => pestaña = "estadisticas"}>
-             Estadísticas
-        </button>
-
-    </div>
-    <div class="acciones-admin">
-        <button class="btn-salir" on:click={cerrarSesion}>
+            class="btn btn-light text-danger fw-bold"
+            on:click={cerrarSesion}>
             Cerrar sesión
         </button>
     </div>
-
 </div>
 
 {#if pestaña === "usuarios"}
     <UsuariosAdmin />
-{/if}
-
-{#if pestaña === "objetos"}
+{:else if pestaña === "objetos"}
     <ObjetosAdmin />
-{/if}
-
-{#if pestaña === "reclamos"}
+{:else if pestaña === "reclamos"}
     <ReclamosAdmin />
-{/if}
-
-{#if pestaña === "estadisticas"}
+{:else if pestaña === "estadisticas"}
     <EstadisticasAdmin />
 {/if}
-<style>
-   .header-admin {
-    background: linear-gradient(
-        135deg,
-        #b30000,
-        #d90429
-    );
-
-    color: white;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    padding: 20px 35px;
-
-    border-radius: 18px;
-
-    margin-bottom: 25px;
-
-    box-shadow: 0 8px 20px rgba(0,0,0,.15);
-}
-
-.titulo h1 {
-    margin: 0;
-    font-size: 2rem;
-}
-
-.titulo p {
-    margin: 5px 0 0 0;
-    opacity: .9;
-}
-.tabs {
-    display: flex;
-    gap: 10px;
-}
-.tabs button {
-    background: rgba(255,255,255,.15);
-
-    border: 1px solid rgba(255,255,255,.25);
-
-    color: white;
-
-    padding: 10px 18px;
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-    transition: .3s;
-}
-.tabs button:hover {
-    background: rgba(255,255,255,.25);
-}
-.tabs button.activo {
-    background: white;
-    color: #b30000;
-    font-weight: bold;
-}
-.acciones-admin {
-    display: flex;
-    align-items: center;
-}
-
-.btn-salir {
-    background: white;
-    color: #b30000;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: .3s;
-}
-
-.btn-salir:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,.2);
-}
-@media (max-width: 900px) {
-
-    .header-admin {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-    }
-
-    .tabs {
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-}
-@media (max-width: 600px) {
-
-    .tabs {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        width: 100%;
-        gap: 8px;
-    }
-
-    .tabs button {
-        width: 100%;
-        padding: 8px;
-        font-size: 0.85rem;
-    }
-
-    .titulo h1 {
-        font-size: 1.5rem;
-    }
-
-}
-</style>
