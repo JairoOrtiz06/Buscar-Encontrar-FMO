@@ -305,7 +305,7 @@
                         on:click={() =>
                             desactivarUsuario(usuario.id)}
                     >
-                        {usuario.estado === "Activo"
+                        {usuario.estado === "aprobado"
                             ? "Desactivar"
                             : "Activar"}
                     </button>

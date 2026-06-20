@@ -1,54 +1,108 @@
 <script lang="ts">
-    let notificacion = "";
-    let objetosPendientes = [
-        {
-            id: 1,
-            nombre: "Calculadora Casio",
-            categoria: "Calculadoras",
-            ubicacion: "Biblioteca",
-            fecha: "2026-06-10",
-            foto: "/svelte.svg",
-            publicadoPor: "Juan Pérez",
-            activo: true
-        },
-        {
-            id: 2,
-            nombre: "USB Kingston",
-            categoria: "Memorias USB",
-            ubicacion: "Edificio A",
-            fecha: "2026-06-11",
-            foto: "/carnet.jpeg",
-            publicadoPor: "Ana Martínez",
-            activo: true
-        }
-    ];
+    import { onMount } from 'svelte';
+    import { dbPromise } from '../base_datos/database.js';
 
-    let objetosAprobados: any[] = [];
+    let notificacion = "";
+    let objetosPendientes: any[] = [];
     let objetoEditando: any = null;
 
-    function aprobarObjeto(id: number) {
-        const objeto = objetosPendientes.find(o => o.id === id);
-        if (objeto) {
-            objetosAprobados = [...objetosAprobados, objeto];
-            objetosPendientes = objetosPendientes.filter(o => o.id !== id);
-            mostrarNotificacion("Publicación aprobada");
+    onMount(async () => {
+        await cargarObjetos();
+    });
+
+    async function cargarObjetos() {
+        const db = await dbPromise;
+
+        const tx = db.transaction('objetos', 'readonly');
+        const store = tx.objectStore('objetos');
+
+        const todos = await store.getAll();
+
+        const hoy = new Date();
+
+        for (const objeto of todos) {
+
+            if (!objeto.fechaPublicacion) continue;
+
+            const fecha = new Date(objeto.fechaPublicacion);
+
+            const dias =
+                (hoy.getTime() - fecha.getTime()) /
+                (1000 * 60 * 60 * 24);
+
+            if (
+                objeto.estado === "pendiente" &&
+                dias >= 7
+            ) {
+                objeto.estado = "archivado";
+
+                const txUpdate = db.transaction(
+                    'objetos',
+                    'readwrite'
+                );
+
+                await txUpdate
+                    .objectStore('objetos')
+                    .put(objeto);
+            }
         }
+
+        const actualizados = await store.getAll();
+
+        objetosPendientes = actualizados.filter(
+            o => o.estado === "pendiente"
+        );
     }
 
-    function rechazarObjeto(id: number) {
-        objetosPendientes = objetosPendientes.filter(o => o.id !== id);
-        mostrarNotificacion("Publicación rechazada");
+    async function eliminarObjeto(id: number) {
+
+        const confirmar = confirm(
+            "¿Desea eliminar este objeto?"
+        );
+
+        if (!confirmar) return;
+
+        const db = await dbPromise;
+
+        const tx = db.transaction(
+            'objetos',
+            'readwrite'
+        );
+
+        const store = tx.objectStore('objetos');
+
+        await store.delete(id);
+
+        await cargarObjetos();
+
+        mostrarNotificacion(
+            "Objeto eliminado correctamente"
+        );
     }
 
     function editarObjeto(objeto: any) {
         objetoEditando = { ...objeto };
     }
 
-    function guardarEdicion() {
-        objetosPendientes = objetosPendientes.map(o =>
-            o.id === objetoEditando.id ? objetoEditando : o
+    async function guardarEdicion() {
+
+        const db = await dbPromise;
+
+        const tx = db.transaction(
+            'objetos',
+            'readwrite'
         );
-        mostrarNotificacion("Objeto editado");
+
+        const store = tx.objectStore('objetos');
+
+        await store.put(objetoEditando);
+
+        await cargarObjetos();
+
+        mostrarNotificacion(
+            "Objeto editado correctamente"
+        );
+
         objetoEditando = null;
     }
 
@@ -56,88 +110,176 @@
         objetoEditando = null;
     }
 
-    function desactivarObjeto(id: number) {
-        objetosPendientes = objetosPendientes.map(o =>
-            o.id === id ? { ...o, activo: false } : o
-        );
-        objetosAprobados = objetosAprobados.map(o =>
-            o.id === id ? { ...o, activo: false } : o
-        );
-        mostrarNotificacion("Objeto desactivado");
-    }
+    function mostrarNotificacion(
+        mensaje: string
+    ) {
 
-    function mostrarNotificacion(mensaje: string) {
         notificacion = mensaje;
+
         setTimeout(() => {
             notificacion = "";
         }, 3000);
     }
+
+    function formatearFecha(fecha: string) {
+
+        if (!fecha) return "Sin fecha";
+
+        return new Date(fecha)
+            .toLocaleDateString();
+    }
 </script>
 
-{#if notificacion}
-    <div class="notificacion">{notificacion}</div>
+{#if notificacion} <div class="notificacion">
+{notificacion} </div>
 {/if}
 
-<h2>Objetos Pendientes</h2>
+<h2>Objetos Publicados</h2>
+
 <div class="contenedor-cards">
-    {#each objetosPendientes.filter(o => o.activo) as objeto}
+
+{#if objetosPendientes.length > 0}
+
+```
+{#each objetosPendientes as objeto}
+
     <div class="card">
+
         <div class="contenido-card">
 
-            <h3>{objeto.nombre}</h3>
-            <p><strong>Categoría:</strong> {objeto.categoria}</p>
-            <p><strong>Ubicación:</strong> {objeto.ubicacion}</p>
-            <p><strong>Fecha:</strong> {objeto.fecha}</p>
-            <p><strong>Publicado por:</strong> {objeto.publicadoPor}</p>
+            <h3>{objeto.titulo}</h3>
+
+            <p>
+                <strong>Categoría:</strong>
+                {objeto.categoria}
+            </p>
+
+            <p>
+                <strong>Ubicación:</strong>
+                {objeto.ubicacion}
+            </p>
+
+            <p>
+                <strong>Fecha:</strong>
+                {formatearFecha(
+                    objeto.fechaPublicacion
+                )}
+            </p>
+
+            <p>
+                <strong>Estado:</strong>
+                {objeto.estado}
+            </p>
 
         </div>
 
-        <img src={objeto.foto} alt={objeto.nombre} class="foto-carnet">
+        {#if objeto.foto}
+            <img
+                src={objeto.foto}
+                alt={objeto.titulo}
+                class="foto-carnet"
+            >
+        {/if}
 
         <div class="acciones">
-            <button class="aprobar" on:click={() => aprobarObjeto(objeto.id)}>Aprobar</button>
-            <button class="editar" on:click={() => editarObjeto(objeto)}>Editar</button>
-            <button class="rechazar" on:click={() => rechazarObjeto(objeto.id)}>Rechazar</button>
+
+            <button
+                class="editar"
+                on:click={() =>
+                    editarObjeto(objeto)}
+            >
+                Editar
+            </button>
+
+            <button
+                class="eliminar"
+                on:click={() =>
+                    eliminarObjeto(objeto.id)}
+            >
+                Eliminar
+            </button>
+
         </div>
+
     </div>
+
 {/each}
+```
+
+{:else}
+
+```
+<p>
+    No hay objetos pendientes.
+</p>
+```
+
+{/if}
+
 </div>
 
 {#if objetoEditando}
-    <div class="modal-overlay" on:click={cancelarEdicion}>
-        <div class="modal-content" on:click|stopPropagation>
-            <h2>Editar Objeto</h2>
-            <label>Nombre: <input bind:value={objetoEditando.nombre}></label>
-            <label>Categoría: <input bind:value={objetoEditando.categoria}></label>
-            <label>Ubicación: <input bind:value={objetoEditando.ubicacion}></label>
-            <label>Fecha: <input type="date" bind:value={objetoEditando.fecha}></label>
-            <div class="acciones">
-                <button on:click={guardarEdicion}>Guardar</button>
-                <button on:click={cancelarEdicion}>Cancelar</button>
-            </div>
-        </div>
+
+<div
+    class="modal-overlay"
+    on:click={cancelarEdicion}
+>
+
+```
+<div
+    class="modal-content"
+    on:click|stopPropagation
+>
+
+    <h2>Editar Objeto</h2>
+
+    <label>
+        Título:
+
+        <input
+            bind:value={objetoEditando.titulo}
+        >
+    </label>
+
+    <label>
+        Categoría:
+
+        <input
+            bind:value={objetoEditando.categoria}
+        >
+    </label>
+
+    <label>
+        Ubicación:
+
+        <input
+            bind:value={objetoEditando.ubicacion}
+        >
+    </label>
+
+    <div class="acciones">
+
+        <button
+            on:click={guardarEdicion}
+        >
+            Guardar
+        </button>
+
+        <button
+            on:click={cancelarEdicion}
+        >
+            Cancelar
+        </button>
+
     </div>
+
+</div>
+```
+
+</div>
+
 {/if}
 
-<h2> Objetos Aprobados</h2>
-{#each objetosAprobados.filter(o => o.activo) as objeto}
-    <div class="contenedor-cards">
-        <div class="card">
-        <div class="contenido-card">
-
-            <h3>{objeto.nombre}</h3>
-            <p><strong>Categoría:</strong> {objeto.categoria}</p>
-            <p><strong>Ubicación:</strong> {objeto.ubicacion}</p>
-            <p><strong>Fecha:</strong> {objeto.fecha}</p>
-            <p><strong>Publicado por:</strong> {objeto.publicadoPor}</p>
-
-        </div>
-
-        <img src={objeto.foto} alt={objeto.nombre} class="foto-carnet">
-    </div>
-    </div>
-    
-{/each}
 
 <style>
     .notificacion {
