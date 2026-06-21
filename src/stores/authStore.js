@@ -26,6 +26,7 @@ import { verificarSesion } from '../servicios/authService.js';
 // Usuario actualmente logueado
 // Estructura: { id, nombre, correo, tipo, carnet }
 // null si no hay usuario logueado
+/** @type {import('svelte/store').Writable<any>} */
 export const usuarioActual = writable(null);
 
 // Token de sesión actual

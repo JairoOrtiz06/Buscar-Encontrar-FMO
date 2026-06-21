@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   // ========================================
   // IMPORTACIONES
   // ========================================
@@ -31,6 +31,19 @@
   // Restaura la sesión si el usuario recarga la página
   import { crearAdminPorDefecto } from './base_datos/database.js';
 
+  let objetoSeleccionado: any = null;
+
+  function reclamarObjeto(objeto: any) {
+    console.log("Objeto seleccionado para reclamar:", objeto);
+    objetoSeleccionado = objeto;
+    paginaActual.set('reclamos');
+  }
+
+  function volverDesdReclamos() {
+    objetoSeleccionado = null;
+    paginaActual.set('buscar');
+  }
+
   onMount(async () => {
     console.log('App montada - restaurando sesión...');
     await crearAdminPorDefecto();
@@ -46,32 +59,26 @@
 
 {#if $estaLogueado}
 
-  {#if $usuarioActual?.tipo === 'admin'}
-
-    <Administracion />
-
-  {:else if $paginaActual === 'inicio'}
-
-    <Inicio />
-
-  {:else if $paginaActual === 'publicar'}
+  {#if $paginaActual === 'publicar'}
 
     <PublicarObjeto />
 
   {:else if $paginaActual === 'buscar'}
 
-    <BuscarObjeto />
+    <BuscarObjeto {reclamarObjeto} />
+
+  {:else if $paginaActual === 'reclamos'}
+
+    <Reclamos objeto={objetoSeleccionado} volver={volverDesdReclamos} />
 
   {:else if $paginaActual === 'historial'}
 
     <VerHistorial />
-  {:else if $paginaActual === 'reclamos'}
 
-  <Reclamos />
+  {:else if $usuarioActual?.tipo === 'admin'}
 
-{:else if $paginaActual === 'historial'}
+    <Administracion />
 
-  <VerHistorial />
   {:else}
 
     <Inicio />

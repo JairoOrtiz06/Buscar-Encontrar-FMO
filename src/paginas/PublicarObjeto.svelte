@@ -1,5 +1,6 @@
 <script>
     import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
+    import { usuarioActual } from '../stores/authStore.js';
     
     // Variables del formulario
     let titulo = '';
@@ -108,13 +109,19 @@
             }
             
             // Crear objeto
+            if (!$usuarioActual?.id) {
+                mensaje = 'Debes iniciar sesión para publicar el objeto.';
+                guardando = false;
+                return;
+            }
+
             const objeto = {
                 titulo: titulo.trim(),
                 descripcion: descripcion.trim(),
                 categoria: categoria,
                 ubicacion: ubicacion.trim(),
                 foto: imagenBase64,
-                idUsuario: 1
+                idUsuario: $usuarioActual.id
             };
             
             // Guardar en la base de datos
