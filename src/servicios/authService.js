@@ -76,6 +76,13 @@ export async function login(correo, contrasena) {
                 mensaje: 'Tu cuenta ha sido rechazada. Contacta al administrador'
             };
         }
+        if (usuario.estado === 'desactivado') {
+            return {
+                exito: false,
+                mensaje: 'Tu cuenta ha sido desactivada. Contacta al administrador'
+            };
+        }
+
 
         // Verificar que la contraseña es correcta
         // Se comparan los hashes (no guardamos contraseñas en texto plano)

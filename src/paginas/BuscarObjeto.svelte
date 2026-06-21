@@ -3,7 +3,15 @@
 
   import { onMount } from "svelte";
   import { dbPromise } from "../base_datos/database.js";
-  import { usuarioActual } from "../stores/authStore.js";
+    import { usuarioActual, logout } from '../stores/authStore.js';
+  import { irA } from '../stores/navegacionStore.js';
+  const enlaces = [
+    { label: 'Inicio', key: 'inicio' },
+    { label: 'Publicar Objeto', key: 'publicar' },
+    { label: 'Buscar Objeto', key: 'buscar' },
+    { label: 'Mi Historial', key: 'historial' },
+    { label: 'Reclamos', key: 'reclamos' }
+  ];
 
   let busqueda: string = "";
   let categoria: string = "Todas";
@@ -39,6 +47,41 @@
 </script>
 
 <main class="min-vh-100" style="background-color: #f1f3f5;">
+  <header class="inicio-header">
+    <div class="header-wrap">
+      <div class="header-left">
+        <p class="hello-text">Hola, {$usuarioActual?.nombre}</p>
+      </div>
+
+      <div class="header-center"></div>
+
+      <div class="header-right">
+        <nav class="nav-grid" aria-label="Navegación principal">
+          {#each enlaces as enlace}
+            <button
+              type="button"
+              class="nav-btn"
+              class:active={enlace.key === 'historial'}
+              on:click={() => irA(enlace.key)}
+            >
+              {enlace.label}
+            </button>
+          {/each}
+          <button
+            type="button"
+            class="logout-btn"
+            on:click={() => {
+              logout();
+              irA('login');
+            }}
+          >
+            Salir
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
   <section class="container py-5">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">

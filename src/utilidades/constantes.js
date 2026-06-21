@@ -17,7 +17,8 @@ export const ESTADOS_OBJETO = [
 export const ESTADOS_USUARIO = [
     "pendiente",
     "aprobado",
-    "rechazado"
+    "rechazado",
+    "desactivado"
 ];
 
 export const ESTADOS_RECLAMO = [

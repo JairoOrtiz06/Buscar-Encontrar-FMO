@@ -43,9 +43,7 @@
       mensaje = 'Selecciona una imagen';
       return;
 
-    import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
-    import { usuarioActual } from '../stores/authStore.js';
-    
+ 
     // Variables del formulario
     let titulo = '';
     let descripcion = '';
@@ -271,6 +269,7 @@
       : mensaje.startsWith('❌')
         ? 'danger'
         : 'info';
+}}
 </script>
 
 <main class="publicar-layout">

@@ -1,19 +1,20 @@
 <script lang="ts">
     import { dbPromise } from '../base_datos/database.js';
     import { onMount } from 'svelte';
+    // importar validaciones 
+    import {
+    validarNombre,
+    validarCorreo,
+    validarCarnet } from '../utilidades/validaciones.js';
 
+    // variables 
     let pestaña = "usuarios";
-
     let usuarios: any[] = [];
-
     let usuariosPendientes: any[] = [];
     let usuariosAprobados: any[] = [];
-
     let carnets: Record<number, string> = {};
-
     let mostrarEditar = false;
     let usuarioEditando: any = null;
-
     let busqueda = "";
     let imagenSeleccionada = "";
     let notificacion = "";
@@ -41,7 +42,8 @@
         usuariosAprobados = todos.filter(
             usuario =>
                 usuario.tipo !== 'admin' &&
-                usuario.estado === 'aprobado'
+                usuario.estado === 'aprobado'||
+                usuario.estado === 'desactivado'
         );
         carnets = {};
 
@@ -59,6 +61,7 @@
         }
     }
     }
+    
 
     async function aprobarUsuario(
         id:number
@@ -130,7 +133,7 @@
 
         usuario.estado =
             usuario.estado === 'aprobado'
-                ? 'rechazado'
+                ? 'desactivado'
                 : 'aprobado';
 
         await db.put(
@@ -173,6 +176,89 @@
 
     async function guardarEdicion() {
 
+            const validNombre =
+            validarNombre(
+                usuarioEditando.nombre
+            );
+
+        if (!validNombre.valido) {
+
+            
+            if(validNombre.error){
+                mostrarNotificacion(validNombre.error);
+            }
+            return;
+        }
+
+        const validCorreo =
+            validarCorreo(
+                usuarioEditando.correo
+            );
+
+        if (!validCorreo.valido) {
+
+            
+            if(validCorreo.error){
+                mostrarNotificacion(validCorreo.error);
+            }
+            return;
+        }
+
+        // Solo validar carnet si existe
+        if (usuarioEditando.carnet) {
+
+            const validCarnet =
+                validarCarnet(
+                    usuarioEditando.carnet
+                );
+
+            if (!validCarnet.valido) {
+
+                if (validCarnet.error) {
+                    mostrarNotificacion(validCarnet.error);
+                }
+                return;
+            }
+        }
+
+        // Evitar correos duplicados
+        const correoExiste =
+            usuarios.some(
+                usuario =>
+                    usuario.id !== usuarioEditando.id &&
+                    usuario.correo.toLowerCase() ===
+                    usuarioEditando.correo.toLowerCase()
+            );
+
+        if (correoExiste) {
+
+            mostrarNotificacion(
+                'Ya existe un usuario con ese correo'
+            );
+
+            return;
+        }
+
+        // Evitar carnet duplicado
+        if (usuarioEditando.carnet) {
+
+            const carnetExiste =
+                usuarios.some(
+                    usuario =>
+                        usuario.id !== usuarioEditando.id &&
+                        usuario.carnet ===
+                        usuarioEditando.carnet
+                );
+
+            if (carnetExiste) {
+
+                mostrarNotificacion(
+                    'Ya existe un usuario con ese carnet'
+                );
+
+                return;
+            }
+        }
         const db = await dbPromise;
 
         await db.put(
@@ -419,7 +505,14 @@
 
                     <td>
 
-                        <span class="badge {usuario.estado === 'aprobado' ? 'bg-success' : 'bg-danger'}">
+                        <span
+                            class="badge
+                            {usuario.estado === 'aprobado'
+                                ? 'bg-success'
+                                : usuario.estado === 'desactivado'
+                                    ? 'bg-secondary'
+                                    : 'bg-danger'}"
+                        >
                             {usuario.estado}
                         </span>
 
@@ -435,7 +528,7 @@
 
                                 {usuario.estado === "aprobado"
                                     ? "Desactivar"
-                                    : "Activar"}
+                                    : "Reactivar"}
 
                             </button>
 
