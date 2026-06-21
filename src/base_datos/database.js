@@ -10,7 +10,7 @@ export async function crearAdminPorDefecto() {
         const db = await dbPromise;
         
         // Verificar si ya existe un admin
-        const adminExistente = await db.getFromIndex('usuarios', 'correo', 'admin@ues.edu.sv');
+       const adminExistente = await db.getFromIndex('usuarios', 'correo', 'ma22013@ues.edu.sv');
         
         if (!adminExistente) {
             // Crear hash de contraseña
