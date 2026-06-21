@@ -15,7 +15,7 @@
     let pestaña = "usuarios";
 </script>
 
-<div class="container bg-danger bg-gradient text-white p-4 rounded shadow mb-4">
+<div class="container-fluid bg-danger bg-gradient text-white p-4 rounded shadow mb-4">
 
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3">
 
@@ -56,7 +56,7 @@
             Cerrar sesión
         </button>
     </div>
-    
+
 </div>
 
 {#if pestaña === "usuarios"}
