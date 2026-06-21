@@ -1,19 +1,36 @@
 <script lang="ts">
-    let pestaña = "usuarios";
-
     import { dbPromise } from '../base_datos/database.js';
     import { onMount } from 'svelte';
 
+    let pestaña = "usuarios";
+
     let usuarios: any[] = [];
-    let carnets: Record<number, string> = {};
 
     let usuariosPendientes: any[] = [];
     let usuariosAprobados: any[] = [];
+
+    let carnets: Record<number, string> = {};
+
+    let mostrarEditar = false;
+    let usuarioEditando: any = null;
+
+    let busqueda = "";
+    let imagenSeleccionada = "";
+    let notificacion = "";
+
+    onMount(async () => {
+        await cargarUsuarios();
+    });
+
     async function cargarUsuarios() {
 
-    const db = await dbPromise;
+        const db = await dbPromise;
 
-    const todos = await db.getAll('usuarios');
+        const todos = await db.getAll(
+            'usuarios'
+        );
+
+        usuarios = todos;
 
         usuariosPendientes = todos.filter(
             usuario =>
@@ -26,22 +43,26 @@
                 usuario.tipo !== 'admin' &&
                 usuario.estado === 'aprobado'
         );
+        carnets = {};
+
+    for (const usuario of todos) {
+
+        const carnet =
+            await obtenerCarnet(
+                usuario.id
+            );
+
+        if (carnet) {
+
+            carnets[usuario.id] =
+                carnet.base64;
+        }
+    }
     }
 
-    
-   onMount(async () => {
-        await cargarUsuarios();
-    });
-  
-    let mostrarEditar = false;
-    let usuarioEditando: any = null;
-
-    let busqueda = "";
-
-    let imagenSeleccionada = "";
-    let notificacion = "";
-
-   async function aprobarUsuario(id:number) {
+    async function aprobarUsuario(
+        id:number
+    ) {
 
         const db = await dbPromise;
 
@@ -52,9 +73,14 @@
         if (!usuario) return;
 
         usuario.validado = true;
-        usuario.estado = 'aprobado';
 
-        await db.put('usuarios', usuario);
+        usuario.estado =
+            'aprobado';
+
+        await db.put(
+            'usuarios',
+            usuario
+        );
 
         await cargarUsuarios();
 
@@ -63,50 +89,9 @@
         );
     }
 
-    async function obtenerFotoPerfil(idUsuario:number) {
-    const db = await dbPromise;
-
-    const fotos = await db.getAllFromIndex(
-        'fotos',
-        'idUsuario',
-        idUsuario
-    );
-
-    return fotos.find(
-        foto => foto.tipo === 'perfil'
-    );
-}
-
-    async function rechazarUsuario(id:number) {
-
-        const db = await dbPromise;
-
-        const usuario = usuarios.find(
-            u => u.id === id
-        );
-
-        if (!usuario) return;
-
-        usuario.estado = 'rechazado';
-
-        await db.put('usuarios', usuario);
-
-        await cargarUsuarios();
-
-        mostrarNotificacion(
-            '❌ Usuario rechazado'
-        );
-    }
-
-    function mostrarNotificacion(mensaje: string) {
-        notificacion = mensaje;
-
-        setTimeout(() => {
-            notificacion = "";
-        }, 3000);
-    }
-
-   async function desactivarUsuario(id:number) {
+    async function rechazarUsuario(
+        id:number
+    ) {
 
         const db = await dbPromise;
 
@@ -117,36 +102,111 @@
         if (!usuario) return;
 
         usuario.estado =
-            usuario.estado === 'Activo'
-                ? 'Inactivo'
-                : 'Activo';
+            'rechazado';
 
-        await db.put('usuarios', usuario);
+        await db.put(
+            'usuarios',
+            usuario
+        );
 
-        usuarios = await db.getAll('usuarios');
+        await cargarUsuarios();
+
+        mostrarNotificacion(
+            '❌ Usuario rechazado'
+        );
+    }
+
+    async function desactivarUsuario(
+        id:number
+    ) {
+
+        const db = await dbPromise;
+
+        const usuario = usuarios.find(
+            u => u.id === id
+        );
+
+        if (!usuario) return;
+
+        usuario.estado =
+            usuario.estado === 'aprobado'
+                ? 'rechazado'
+                : 'aprobado';
+
+        await db.put(
+            'usuarios',
+            usuario
+        );
+
+        await cargarUsuarios();
 
         mostrarNotificacion(
             '🔄 Estado actualizado'
         );
     }
 
-    function editarUsuario(usuario: any) {
-    usuarioEditando = { ...usuario };
-    mostrarEditar = true;}
+    async function obtenerCarnet(idUsuario:number) {
+
+    const db = await dbPromise;
+
+    const fotos = await db.getAllFromIndex(
+        'fotos',
+        'idUsuario',
+        idUsuario
+    );
+
+    return fotos.find(
+        foto => foto.tipo === 'carnet'
+    );
+}
+
+    function editarUsuario(
+        usuario:any
+    ) {
+
+        usuarioEditando = {
+            ...usuario
+        };
+
+        mostrarEditar = true;
+    }
 
     async function guardarEdicion() {
 
         const db = await dbPromise;
 
-        await db.put('usuarios', usuarioEditando);
+        await db.put(
+            'usuarios',
+            usuarioEditando
+        );
 
         await cargarUsuarios();
 
         mostrarEditar = false;
 
         mostrarNotificacion(
-            "✏️ Usuario actualizado"
+            '✏️ Usuario actualizado'
         );
+    }
+
+    function cancelarEdicion() {
+
+        mostrarEditar = false;
+
+        usuarioEditando = null;
+    }
+
+    function mostrarNotificacion(
+        mensaje:string
+    ) {
+
+        notificacion = mensaje;
+
+        setTimeout(() => {
+
+            notificacion = "";
+
+        }, 3000);
     }
 </script>
 {#if notificacion}
@@ -158,7 +218,7 @@
 <h2 class="text-center text-danger mb-4">Aprobar Registros</h2>
 
 <div class="row g-3">
-    {#each usuarios as usuario}
+    {#each usuariosPendientes  as usuario}
         <div class="col-md-4">
             <div class="card shadow h-100">
                 <div class="card-body">
