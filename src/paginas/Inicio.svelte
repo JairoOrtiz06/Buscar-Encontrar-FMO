@@ -1,51 +1,38 @@
 <script>
   import { usuarioActual, logout } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
+
+  const enlaces = [
+    { label: 'Inicio', key: 'inicio' },
+    { label: 'Publicar Objeto', key: 'publicar' },
+    { label: 'Buscar Objeto', key: 'buscar' },
+    { label: 'Mi Historial', key: 'historial' },
+    { label: 'Reclamos', key: 'reclamos' }
+  ];
 </script>
 
-<main class="min-vh-100" style="background-color: #f4f4f4;">
-  <header class="text-white shadow-sm" style="background-color: #990c14;">
-    <div class="container py-4">
-      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-4">
-        <div class="text-center text-lg-start">
-          <h1 class="fw-bold mb-1 text-white">
-            Encuentra UES-FMO
-          </h1>
-          <p class="mb-0 text-white fw-semibold">
-            Sistema de Objetos Perdidos y Encontrados
-          </p>
-        </div>
+<main class="inicio-layout">
+  <header class="inicio-header">
+    <div class="header-wrap">
+      <div class="header-left">
+        <p class="hello-text">Hola, {$usuarioActual?.nombre}</p>
+      </div>
 
-        <div class="d-flex flex-wrap justify-content-center gap-2">
-          <button class="btn btn-light fw-bold px-3" style="color: #990c14;" on:click={() => irA('inicio')}>
-            Inicio
-          </button>
+      <div class="header-center"></div>
 
-          <button class="btn btn-outline-light fw-bold px-3" on:click={() => irA('publicar')}>
-            Publicar Objeto
-          </button>
-
-          <button class="btn btn-outline-light fw-bold px-3" on:click={() => irA('buscar')}>
-            Buscar Objeto
-          </button>
-
-          <button class="btn btn-outline-light fw-bold px-3" on:click={() => irA('historial')}>
-            Mi Historial
-          </button>
-
-          <button class="btn btn-outline-light fw-bold px-3" on:click={() => irA('reclamos')}>
-            Reclamos
-          </button>
-        </div>
-
-        <div class="d-flex align-items-center gap-3">
-          <span class="small fw-bold text-white">
-            {$usuarioActual.nombre}
-          </span>
-
+      <div class="header-right">
+        <nav class="nav-grid" aria-label="Navegación principal">
+          {#each enlaces as enlace}
+            <button
+              class="nav-btn"
+              class:active={enlace.key === 'inicio'}
+              on:click={() => irA(enlace.key)}
+            >
+              {enlace.label}
+            </button>
+          {/each}
           <button
-            class="btn btn-light fw-bold px-3"
-            style="color: #990c14;"
+            class="logout-btn"
             on:click={() => {
               logout();
               irA('login');
@@ -53,64 +40,334 @@
           >
             Salir
           </button>
-        </div>
+        </nav>
       </div>
     </div>
   </header>
 
-  <section class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-9 col-xl-8">
-        <div class="card border-0 shadow-lg">
-          <div class="card-header text-white text-center py-4" style="background-color: #990c14;">
-            <h2 class="fw-bold mb-0 text-white">
-              Panel Principal
-            </h2>
-          </div>
+  <section class="inicio-main">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Panel Principal</h2>
+      </div>
 
-          <div class="card-body p-5">
-            <div class="text-center mb-4">
-              <h3 class="fw-bold mb-3" style="color: #990c14;">
-                Sistema de Objetos Perdidos y Encontrados
-              </h3>
+      <div class="panel-body">
+        <div class="welcome-block">
+          <h3>Sistema de Objetos Perdidos y Encontrados</h3>
+          <p>Bienvenido, {$usuarioActual?.nombre}. Tu sesión está activa.</p>
+        </div>
 
-              <p class="lead text-secondary mb-0">
-                Bienvenido, {$usuarioActual.nombre}. Tu sesión está activa.
-              </p>
-            </div>
+        <div class="status-grid">
+          <article class="status-card">
+            <p class="label">Tipo de usuario</p>
+            <p class="value role">{$usuarioActual?.tipo}</p>
+          </article>
 
-            <div class="row g-4 mt-2">
-              <div class="col-md-6">
-                <div class="border rounded-3 p-4 h-100 bg-light">
-                  <p class="text-uppercase text-secondary small fw-bold mb-2">
-                    Tipo de usuario
-                  </p>
+          <article class="status-card">
+            <p class="label">Estado de sesión</p>
+            <p class="value online">Activa</p>
+          </article>
 
-                  <p class="fs-4 fw-bold mb-0" style="color: #990c14;">
-                    {$usuarioActual.tipo}
-                  </p>
-                </div>
-              </div>
+          <article class="status-card">
+            <p class="label">Mis publicaciones</p>
+            <p class="value summary">{$usuarioActual?.totalPublicaciones ?? 0}</p>
+          </article>
 
-              <div class="col-md-6">
-                <div class="border rounded-3 p-4 h-100 bg-light">
-                  <p class="text-uppercase text-secondary small fw-bold mb-2">
-                    Estado de sesión
-                  </p>
+          <article class="status-card">
+            <p class="label">Mis reclamos</p>
+            <p class="value summary">{$usuarioActual?.totalReclamos ?? 0}</p>
+          </article>
+        </div>
 
-                  <p class="fs-4 fw-bold text-success mb-0">
-                    Activa
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="alert border-0 mt-4 mb-0 text-white fw-semibold" style="background-color: #990c14;">
-              Esta es la página de inicio. Usa el menú superior para publicar, buscar o revisar tu historial.
-            </div>
-          </div>
+        <div class="notice">
+          Esta es la página de inicio. Usa el menú superior para publicar, buscar o revisar tu historial.
         </div>
       </div>
     </div>
   </section>
+
+  <footer class="inicio-footer">
+    <div class="footer-wrap">
+      <h4>Encuentra UES-FMO</h4>
+      <p>Plataforma universitaria para recuperar objetos perdidos y reportar hallazgos.</p>
+    </div>
+  </footer>
 </main>
+
+<style>
+  .inicio-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f4f6f8;
+  }
+
+  .inicio-header {
+    background: #990c14;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  }
+
+  .header-wrap {
+    width: min(1320px, 98%);
+    margin: 0 auto;
+    padding: 0.72rem 0;
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) 1fr minmax(760px, auto);
+    align-items: center;
+    column-gap: 0.25rem;
+  }
+
+  .header-left {
+    justify-self: start;
+    min-width: 0;
+  }
+
+  .hello-text {
+    margin: 0;
+    font-size: clamp(1rem, 1.45vw, 1.15rem);
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .header-center {
+    min-height: 1px;
+  }
+
+  .header-right {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .nav-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.42rem;
+  }
+
+  .nav-btn {
+    border: 1px solid #fff;
+    background: transparent;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 9px;
+    padding: 0.44rem 0.68rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.1;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover,
+  .nav-btn.active {
+    background: #fff;
+    color: #990c14;
+  }
+
+  .logout-btn {
+    border: none;
+    background: #fff;
+    color: #990c14;
+    font-weight: 900;
+    border-radius: 9px;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    line-height: 1.1;
+    white-space: nowrap;
+    font-size: 0.86rem;
+  }
+
+  .inicio-main {
+    flex: 1;
+    width: min(980px, 92%);
+    margin: clamp(1.2rem, 4vw, 2.5rem) auto;
+  }
+
+  .panel {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(24, 28, 36, 0.12);
+  }
+
+  .panel-header {
+    background: #990c14;
+    padding: 1.1rem;
+    text-align: center;
+  }
+
+  .panel-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1.35rem, 3.2vw, 2rem);
+    font-weight: 800;
+  }
+
+  .panel-body {
+    padding: clamp(1rem, 4vw, 2.2rem);
+  }
+
+  .welcome-block {
+    text-align: center;
+    margin-bottom: 1.4rem;
+  }
+
+  .welcome-block h3 {
+    margin: 0 0 0.5rem;
+    color: #990c14;
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+  }
+
+  .welcome-block p {
+    margin: 0;
+    color: #6b7280;
+    font-size: clamp(0.95rem, 2vw, 1.2rem);
+  }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .status-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f9fafb;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .label {
+    margin: 0;
+    text-transform: uppercase;
+    color: #6b7280;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+  }
+
+  .value {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.25rem, 3vw, 1.9rem);
+    font-weight: 800;
+  }
+
+  .role {
+    color: #990c14;
+  }
+
+  .online {
+    color: #0f9d58;
+  }
+
+  .summary {
+    color: #1f2937;
+  }
+
+  .notice {
+    margin-top: 1.2rem;
+    border-radius: 12px;
+    padding: 0.95rem 1rem;
+    background: #990c14;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .inicio-footer {
+    background: #1f1f24;
+    color: #f3f4f6;
+    padding: 1rem 0;
+    border-top: 4px solid #990c14;
+  }
+
+  .footer-wrap {
+    width: min(1100px, 94%);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .footer-wrap h4 {
+    margin: 0 0 0.2rem;
+    color: #ffffff;
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+  }
+
+  .footer-wrap p {
+    margin: 0;
+    color: #d1d5db;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1200px) and (min-width: 769px) {
+    .header-wrap {
+      grid-template-columns: 1fr;
+      row-gap: 0.7rem;
+    }
+
+    .header-left,
+    .header-right {
+      justify-self: center;
+    }
+
+    .hello-text {
+      text-align: center;
+      max-width: 100%;
+    }
+
+    .header-right {
+      width: 100%;
+    }
+
+    .nav-grid {
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header-wrap {
+      width: min(97%, 700px);
+      grid-template-columns: 1fr;
+      row-gap: 0.6rem;
+    }
+
+    .header-left,
+    .header-right {
+      justify-self: stretch;
+      width: 100%;
+    }
+
+    .hello-text {
+      text-align: left;
+      white-space: normal;
+      line-height: 1.2;
+    }
+
+    .nav-grid {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 0.42rem;
+    }
+
+    .nav-btn,
+    .logout-btn {
+      flex: 1 1 calc(50% - 0.42rem);
+      text-align: center;
+    }
+
+    .status-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
