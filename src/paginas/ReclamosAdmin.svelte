@@ -1,220 +1,124 @@
 <script lang="ts">
-    let reclamosPendientes = [
-    {
-        id: 1,
-        objeto: "Calculadora Casio",
-        solicitante: "Carlos Gómez",
-        correo: "cgomez@ues.edu.sv",
-        descripcion:
-            "La calculadora tiene una pegatina azul con mis iniciales.",
-        fecha: "2026-06-12"
-    },
-    {
-        id: 2,
-        objeto: "USB Kingston",
-        solicitante: "María Pérez",
-        correo: "mperez@ues.edu.sv",
-        descripcion:
-            "Tiene una cinta roja en el extremo.",
-        fecha: "2026-06-13"
-    }];
+    import { onMount } from 'svelte';
+    import { dbPromise } from '../base_datos/database.js';
 
+    let notificacion = "";
+    let reclamosPendientes: any[] = [];
     let reclamosAprobados: any[] = [];
+    let reclamosRechazados: any[] = [];
 
-    function aprobarReclamo(id: number) {
+    onMount(async () => {
+        await cargarReclamos();
+    });
 
-    const reclamo =
-        reclamosPendientes.find(
-            r => r.id === id
-        );
+    async function cargarReclamos() {
+        const db = await dbPromise;
+        const tx = db.transaction('reclamos', 'readonly');
+        const store = tx.objectStore('reclamos');
+        const todos = await store.getAll();
 
-    if (reclamo) {
-
-        reclamosAprobados = [
-            ...reclamosAprobados,
-            reclamo
-        ];
-
-        reclamosPendientes =
-            reclamosPendientes.filter(
-                r => r.id !== id
-            );
+        reclamosPendientes = todos.filter(r => r.estado === "pendiente");
+        reclamosAprobados = todos.filter(r => r.estado === "aprobado");
+        reclamosRechazados = todos.filter(r => r.estado === "rechazado");
     }
-    }
-    function rechazarReclamo(id: number) {
 
-    reclamosPendientes =
-        reclamosPendientes.filter(
-            r => r.id !== id
-        );
-}
+    async function aprobarReclamo(id: number) {
+        const db = await dbPromise;
+        const tx = db.transaction('reclamos', 'readwrite');
+        const store = tx.objectStore('reclamos');
+        const reclamo = await store.get(id);
+        if (!reclamo) return;
+
+        reclamo.estado = "aprobado";
+        await store.put(reclamo);
+        await cargarReclamos();
+        mostrarNotificacion("Reclamo aprobado");
+    }
+
+    async function rechazarReclamo(id: number) {
+        const db = await dbPromise;
+        const tx = db.transaction('reclamos', 'readwrite');
+        const store = tx.objectStore('reclamos');
+        const reclamo = await store.get(id);
+        if (!reclamo) return;
+
+        reclamo.estado = "rechazado";
+        await store.put(reclamo);
+        await cargarReclamos();
+        mostrarNotificacion("Reclamo rechazado");
+    }
+
+    function mostrarNotificacion(mensaje: string) {
+        notificacion = mensaje;
+        setTimeout(() => { notificacion = ""; }, 3000);
+    }
+
+    function formatearFecha(fecha: string) {
+        if (!fecha) return "Sin fecha";
+        return new Date(fecha).toLocaleDateString();
+    }
 </script>
-<h2>📋 Reclamos Pendientes</h2>
 
-<div class="contenedor-cards">
-
-{#each reclamosPendientes as reclamo}
-
-<div class="card">
-
-    <h3>{reclamo.objeto}</h3>
-
-    <p>
-        <strong>Solicitante:</strong>
-        {reclamo.solicitante}
-    </p>
-
-    <p>
-        <strong>Correo:</strong>
-        {reclamo.correo}
-    </p>
-
-    <p>
-        <strong>Descripción:</strong>
-        {reclamo.descripcion}
-    </p>
-
-    <p>
-        <strong>Fecha:</strong>
-        {reclamo.fecha}
-    </p>
-
-    <div class="acciones">
-
-        <button
-            class="aprobar"
-            on:click={() =>
-                aprobarReclamo(reclamo.id)}>
-
-            Aprobar
-
-        </button>
-
-        <button
-            class="rechazar"
-            on:click={() =>
-                rechazarReclamo(reclamo.id)}>
-
-            Rechazar
-
-        </button>
-
+{#if notificacion}
+    <div class="alert alert-info text-center shadow position-fixed top-0 end-0 m-3">
+        {notificacion}
     </div>
+{/if}
 
+<h2 class="text-center text-danger my-4">📋 Reclamos Pendientes</h2>
+
+<div class="row g-4">
+    {#if reclamosPendientes.length > 0}
+        {#each reclamosPendientes as reclamo}
+            <div class="col-md-4">
+                <div class="card shadow h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Reclamo #{reclamo.id}</h5>
+                        <p><strong>ID Objeto:</strong> {reclamo.idObjeto}</p>
+                        <p><strong>ID Solicitante:</strong> {reclamo.idSolicitante}</p>
+                        <p><strong>Estado:</strong> {reclamo.estado}</p>
+                        <p><strong>Fecha:</strong> {formatearFecha(reclamo.fechaSolicitud)}</p>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-success btn-sm" on:click={() => aprobarReclamo(reclamo.id)}>Aprobar</button>
+                            <button class="btn btn-danger btn-sm" on:click={() => rechazarReclamo(reclamo.id)}>Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/each}
+    {:else}
+        <p class="text-muted text-center">No hay reclamos pendientes.</p>
+    {/if}
 </div>
 
-{/each}
-
-</div>
-<h2>✅ Reclamos Aprobados</h2>
-
-<div class="contenedor-cards">
-
-{#each reclamosAprobados as reclamo}
-
-<div class="card card-aprobada">
-
-    <h3>{reclamo.objeto}</h3>
-
-    <p>
-        {reclamo.solicitante}
-    </p>
-
-    <span class="estado-aprobado">
-        ✓ Entrega Autorizada
-    </span>
-
+<h2 class="text-center text-success my-4">✅ Reclamos Aprobados</h2>
+<div class="row g-4">
+    {#each reclamosAprobados as reclamo}
+        <div class="col-md-4">
+            <div class="card border-success shadow h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Reclamo #{reclamo.id}</h5>
+                    <p>ID Objeto: {reclamo.idObjeto}</p>
+                    <p>ID Solicitante: {reclamo.idSolicitante}</p>
+                    <span class="badge bg-success">✓ Aprobado</span>
+                </div>
+            </div>
+        </div>
+    {/each}
 </div>
 
-{/each}
-
+<h2 class="text-center text-danger my-4">❌ Reclamos Rechazados</h2>
+<div class="row g-4">
+    {#each reclamosRechazados as reclamo}
+        <div class="col-md-4">
+            <div class="card border-danger shadow h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Reclamo #{reclamo.id}</h5>
+                    <p>ID Objeto: {reclamo.idObjeto}</p>
+                    <p>ID Solicitante: {reclamo.idSolicitante}</p>
+                    <span class="badge bg-danger">✕ Rechazado</span>
+                </div>
+            </div>
+        </div>
+    {/each}
 </div>
-<style>
-    .contenedor-cards {
-    display: grid;
-    grid-template-columns:
-        repeat(auto-fit,
-        minmax(280px, 1fr));
-
-    gap: 1.5rem;
-
-    margin-bottom: 2rem;
-}
-
-.card {
-    background: white;
-    border-radius: 18px;
-    padding: 1.5rem;
-    border-left: 6px solid #b30000;
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.08);
-
-    transition: .3s;
-}
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow:
-        0 15px 35px rgba(0,0,0,.15);
-}
-h2 {
-    color: #b30000;
-    text-align: center;
-    margin: 2rem 0 1rem;
-}
-h3 {
-    color: #991b1b;
-    margin-bottom: 1rem;
-}
-.card p {
-    margin: .6rem 0;
-    color: #475569;
-}
-.card p:nth-of-type(3) {
-    background: #f8fafc;
-    padding: 10px;
-    border-radius: 10px;
-    border-left: 4px solid #b30000;
-}
-.acciones {
-    display: flex;
-    gap: 10px;
-    margin-top: 1rem;
-}
-.acciones button {
-    flex: 1;
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: .3s;
-}
-.aprobar {
-    background: #16a34a;
-    color: white;
-}
-
-.aprobar:hover {
-    background: #15803d;
-}
-.rechazar {
-    background: #dc2626;
-    color: white;
-}
-
-.rechazar:hover {
-    background: #b91c1c;
-}
-.card-aprobada {
-    border-left: 6px solid #16a34a;
-}
-.estado-aprobado {
-    display: inline-block;
-    margin-top: 10px;
-    background: #dcfce7;
-    color: #15803d;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-weight: bold;
-}
-</style>
