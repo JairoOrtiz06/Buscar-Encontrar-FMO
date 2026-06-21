@@ -1,4 +1,5 @@
 <script>
+ 
   import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
   import { usuarioActual, logout } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
@@ -41,6 +42,62 @@
     if (!archivo.type.startsWith('image/')) {
       mensaje = 'Selecciona una imagen';
       return;
+
+    import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
+    import { usuarioActual } from '../stores/authStore.js';
+    
+    // Variables del formulario
+    let titulo = '';
+    let descripcion = '';
+    let categoria = 'otros';
+    let ubicacion = '';
+    let foto = null;
+    let vistaPrevia = null;
+    let guardando = false;
+    let mensaje = '';
+    let duplicadoDetectado = false;
+    
+    // Categorías disponibles
+    const categorias = [
+        { valor: 'carnés', label: 'Carnés' },
+        { valor: 'memorias usb', label: 'Memorias USB' },
+        { valor: 'calculadoras', label: 'Calculadoras' },
+        { valor: 'cuadernos', label: 'Cuadernos' },
+        { valor: 'mochilas', label: 'Mochilas' },
+        { valor: 'llaves', label: 'Llaves' },
+        { valor: 'cargadores', label: 'Cargadores' },
+        { valor: 'teléfonos', label: 'Teléfonos' },
+        { valor: 'documentos', label: 'Documentos' },
+        { valor: 'otros', label: 'Otros' }
+    ];
+    
+    // Función para procesar la imagen seleccionada
+    function procesarImagen(evento) {
+        const archivo = evento.target.files[0];
+        if (!archivo) return;
+        
+        // Validar tipo de archivo
+        if (!archivo.type.startsWith('image/')) {
+            mensaje = 'Selecciona una imagen';
+            return;
+        }
+        
+        // Validar tamaño máximo (5MB)
+        if (archivo.size > 5 * 1024 * 1024) {
+            mensaje = 'La imagen debe ser menor a 5MB';
+            return;
+        }
+        
+        foto = archivo;
+        
+        // Mostrar vista previa
+        const lector = new FileReader();
+        lector.onload = e => vistaPrevia = e.target.result;
+        lector.readAsDataURL(archivo);
+        
+        mensaje = '';
+        duplicadoDetectado = false;
+
     }
 
     if (archivo.size > 5 * 1024 * 1024) {
@@ -72,11 +129,80 @@
       return { valido: true, duplicado: false };
     }
 
+
     try {
       const duplicado = await verificarDuplicado(titulo, categoria, ubicacion);
       return { valido: true, duplicado: !!duplicado };
     } catch (e) {
       return { valido: false, duplicado: false };
+
+    
+    // Función principal para guardar el objeto
+    async function guardarObjeto() {
+        // Validar campos requeridos
+        if (!titulo.trim() || !categoria || !ubicacion.trim()) {
+            mensaje = 'Completa todos los campos';
+            return;
+        }
+        
+        mensaje = '';
+        duplicadoDetectado = false;
+        
+        // Verificar duplicado antes de guardar
+        const verificacion = await buscarDuplicados();
+        
+        if (verificacion.duplicado) {
+            duplicadoDetectado = true;
+            mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
+            return;
+        }
+        
+        guardando = true;
+        
+        try {
+            // Convertir imagen a Base64 si existe
+            let imagenBase64 = null;
+            if (foto) {
+                imagenBase64 = await convertirImagenABase64(foto);
+            }
+            
+            // Crear objeto
+            if (!$usuarioActual?.id) {
+                mensaje = 'Debes iniciar sesión para publicar el objeto.';
+                guardando = false;
+                return;
+            }
+
+            const objeto = {
+                titulo: titulo.trim(),
+                descripcion: descripcion.trim(),
+                categoria: categoria,
+                ubicacion: ubicacion.trim(),
+                foto: imagenBase64,
+                idUsuario: $usuarioActual.id
+            };
+            
+            // Guardar en la base de datos
+            await crearObjeto(objeto);
+            
+            mensaje = '✅ Objeto publicado correctamente';
+            
+            // Redireccionar al inicio después de 1.5 segundos
+            setTimeout(() => window.location.href = '/', 1500);
+            
+        } catch (error) {
+            console.error(error);
+            
+            if (error.message === 'DUPLICADO') {
+                duplicadoDetectado = true;
+                mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
+            } else {
+                mensaje = '❌ Error al guardar el objeto';
+            }
+        } finally {
+            guardando = false;
+        }
+
     }
   }
 

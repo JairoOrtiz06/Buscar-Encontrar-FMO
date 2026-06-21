@@ -27,6 +27,10 @@ export async function verificarDuplicado(titulo, categoria, ubicacion) {
 
 // Crear nuevo objeto
 export async function crearObjeto(objeto) {
+    if (objeto.idUsuario == null) {
+        throw new Error('USUARIO_NO_VALIDO');
+    }
+
     // Verificar duplicado primero
     const duplicado = await verificarDuplicado(
         objeto.titulo, 
