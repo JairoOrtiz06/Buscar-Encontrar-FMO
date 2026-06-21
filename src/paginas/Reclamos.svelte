@@ -1,6 +1,8 @@
 <script lang="ts">
     import { dbPromise } from '../base_datos/database.js';
     import { usuarioActual } from '../stores/authStore.js';
+    import Navbar from '../componentes/Navbar.svelte';
+    import Footer from '../componentes/Footer.svelte';
 
     export let objeto: {
         id: number | null;
@@ -93,6 +95,8 @@
         }
     }
 </script>
+
+<Navbar paginaActual="reclamos" />
 
 <main class="min-vh-100" style="background-color: #f1f3f5;">
   <section class="container py-5">
@@ -295,4 +299,15 @@
       </div>
     </div>
   </section>
+
+  <footer class="inicio-footer">
+    <div class="footer-wrap">
+      <h4>Encuentra UES-FMO</h4>
+      <p>Plataforma universitaria para recuperar objetos perdidos y reportar hallazgos.</p>
+    </div>
+  </footer>
 </main>
+
+
+
+
