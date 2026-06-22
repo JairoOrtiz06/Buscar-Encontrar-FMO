@@ -147,6 +147,7 @@
       : mensaje.startsWith('❌')
         ? 'danger'
         : 'info';
+
 </script>
 
 <main class="publicar-layout">
