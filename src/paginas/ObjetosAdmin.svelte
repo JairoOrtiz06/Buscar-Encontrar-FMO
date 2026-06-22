@@ -8,6 +8,8 @@
     let objetoEditando: any = null;
 
     onMount(async () => {
+        await archivarObjetosVencidos();
+
         await cargarObjetos();
     });
 
@@ -16,20 +18,6 @@
         const tx = db.transaction('objetos', 'readonly');
         const store = tx.objectStore('objetos');
         const todos = await store.getAll();
-
-        const hoy = new Date();
-
-        for (const objeto of todos) {
-            if (!objeto.fechaPublicacion) continue;
-            const fecha = new Date(objeto.fechaPublicacion);
-            const dias = (hoy.getTime() - fecha.getTime()) / (1000 * 60 * 60 * 24);
-
-            if (objeto.estado === "pendiente" && dias >= 7) {
-                objeto.estado = "archivado";
-                const txUpdate = db.transaction('objetos', 'readwrite');
-                await txUpdate.objectStore('objetos').put(objeto);
-            }
-        }
 
         const actualizados = await store.getAll();
         objetosPendientes = actualizados.filter(o => o.estado === "pendiente");
@@ -73,13 +61,69 @@
             notificacion = "";
         }, 3000);
     }
+    async function archivarObjetosVencidos() {
+
+        const db = await dbPromise;
+
+        const tx = db.transaction('objetos', 'readwrite');
+        const store = tx.objectStore('objetos');
+
+        const todos = await store.getAll();
+
+        const hoy = new Date();
+
+        for (const objeto of todos) {
+
+            if (!objeto.fechaPublicacion) continue;
+
+            const fecha = new Date(objeto.fechaPublicacion);
+
+            const dias =
+                (hoy.getTime() - fecha.getTime()) /
+                (1000 * 60 * 60 * 24);
+
+            if (
+                objeto.estado === "pendiente" &&
+                dias >= 7
+            ) {
+
+                objeto.estado = "archivado";
+
+                await store.put(objeto);
+            }
+        }
+    }
 
     function formatearFecha(fecha: string) {
         if (!fecha) return "Sin fecha";
         return new Date(fecha).toLocaleDateString();
     }
-</script>
+    function diasRestantes(fechaPublicacion: string) {
 
+        if (!fechaPublicacion) return 0;
+
+        const fecha = new Date(fechaPublicacion);
+        const hoy = new Date();
+
+        const diasTranscurridos = Math.floor(
+            (hoy.getTime() - fecha.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+
+        const restantes = 7 - diasTranscurridos;
+
+        return restantes > 0 ? restantes : 0;
+    }
+    function fechaArchivo(fechaPublicacion: string) {
+
+        const fecha = new Date(fechaPublicacion);
+
+        fecha.setDate(fecha.getDate() + 7);
+
+        return fecha.toLocaleDateString();
+    }
+</script>
+<div class="container">
 {#if notificacion}
     <div class="alert alert-success text-center" role="alert">
         {notificacion}
@@ -102,6 +146,33 @@
                         <p class="card-text"><strong>Ubicación:</strong> {objeto.ubicacion}</p>
                         <p class="card-text"><strong>Fecha:</strong> {formatearFecha(objeto.fechaPublicacion)}</p>
                         <p class="card-text"><strong>Estado:</strong> {objeto.estado}</p>
+                        {#if objeto.estado === "pendiente"}
+
+                            {#if diasRestantes(objeto.fechaPublicacion) <= 2}
+
+                                <span class="badge bg-danger">
+                                    Quedan {diasRestantes(objeto.fechaPublicacion)} días
+                                </span>
+
+                            {:else if diasRestantes(objeto.fechaPublicacion) <= 4}
+
+                                <span class="badge bg-warning text-dark">
+                                    Quedan {diasRestantes(objeto.fechaPublicacion)} días
+                                </span>
+
+                            {:else}
+
+                                <span class="badge bg-success">
+                                    Quedan {diasRestantes(objeto.fechaPublicacion)} días
+                                </span>
+
+                            {/if}
+
+                            {/if}
+                                <p class="card-text">
+                                <strong>Se archivará:</strong>
+                                {fechaArchivo(objeto.fechaPublicacion)}
+                            </p>
                     </div>
                     <div class="card-footer d-flex justify-content-between">
                         <button class="btn btn-primary btn-sm" on:click={() => editarObjeto(objeto)}>Editar</button>
@@ -171,6 +242,7 @@
         </div>
     </div>
 {/if}
+</div>
 <footer class=" bg-danger text-white text-center p-3 rounded mt-4">
 
     <p class="mb-1">

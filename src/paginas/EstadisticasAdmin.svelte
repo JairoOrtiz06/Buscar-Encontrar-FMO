@@ -12,6 +12,7 @@
         aprobados:0,
         rechazados:0
     };
+    
     let todosLosObjetos: any[] = [];
 
     onMount(async () => {

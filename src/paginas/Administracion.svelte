@@ -6,6 +6,7 @@
 
     import { logout } from '../stores/authStore.js';
     import { irA } from '../stores/navegacionStore.js';
+    
 
     function cerrarSesion() {
         logout();
