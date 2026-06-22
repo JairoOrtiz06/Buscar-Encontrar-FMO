@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { dbPromise } from '../base_datos/database.js';
+    import { CATEGORIAS } from '../utilidades/constantes.js';
 
     let notificacion = "";
     let objetosPendientes: any[] = [];
@@ -129,7 +130,33 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
-                        <input class="form-control" bind:value={objetoEditando.categoria}>
+
+                        <select
+                            class="form-select"
+                            bind:value={objetoEditando.categoria}
+                        >
+                            <option value="">
+                                Seleccione una categoría
+                            </option>
+
+                            {#each CATEGORIAS as categoria}
+                                <option value={categoria}>
+                                    {categoria}
+                                </option>
+                            {/each}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            rows="3"
+                            bind:value={objetoEditando.descripcion}
+                        ></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ubicación</label>
