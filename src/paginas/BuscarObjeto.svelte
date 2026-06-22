@@ -15,11 +15,21 @@
 
   async function cargarObjetos() {
     const db = await dbPromise;
+    const [objetosGuardados, usuarios] = await Promise.all([
+      db.getAll("objetos"),
+      db.getAll("usuarios")
+    ]);
 
-    const tx = db.transaction("objetos", "readonly");
-    const store = tx.objectStore("objetos");
+    const usuariosPorId = new Map(
+      usuarios.map((usuario) => [String(usuario.id), usuario.nombre])
+    );
 
-    objetos = await store.getAll();
+    objetos = objetosGuardados.map((objeto) => ({
+      ...objeto,
+      publicadoPor: objeto.idUsuario != null
+        ? usuariosPorId.get(String(objeto.idUsuario)) || "Usuario no disponible"
+        : "Usuario no disponible"
+    }));
 
     console.log("OBJETOS CARGADOS:", objetos);
   }
@@ -39,7 +49,9 @@
     const perteneceAlUsuarioActual =
       objeto.idUsuario != null && String(objeto.idUsuario) === usuarioIdActual;
 
-    return coincideNombre && coincideCategoria && !perteneceAlUsuarioActual;
+    const estaDisponible = objeto.estado === "pendiente";
+
+    return coincideNombre && coincideCategoria && !perteneceAlUsuarioActual && estaDisponible;
   });
 </script>
 
@@ -53,10 +65,7 @@
         <div class="mb-4">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
             <div>
-              <p class="text-uppercase fw-bold small mb-2" style="color: #990c14; letter-spacing: .12rem;">
-                Universidad de El Salvador - FMO
-              </p>
-
+              
               <h1 class="fw-bold mb-2" style="color: #990c14;">
                 Buscar Objetos
               </h1>
@@ -100,7 +109,7 @@
                   aria-label="Seleccionar categoría"
                 >
                   <option value="Todas">Todas las categorías</option>
-                  <option value="carnés">Carnés</option>
+                  <option value="carnés">Carnet</option>
                   <option value="memorias usb">Memorias USB</option>
                   <option value="calculadoras">Calculadoras</option>
                   <option value="cuadernos">Cuadernos</option>
@@ -154,7 +163,12 @@
                     </p>
 
                     <p class="mb-2 text-secondary">
-                      <strong class="text-dark">Ubicación:</strong>
+                      <strong class="text-dark">Publicado por:</strong>
+                      {objeto.publicadoPor}
+                    </p>
+
+                    <p class="mb-2 text-secondary">
+                      <strong class="text-dark">Lugar encontrado:</strong>
                       {objeto.ubicacion}
                     </p>
 

@@ -45,6 +45,7 @@
   
   // Servicio de autenticación
   import { login } from '../servicios/authService.js';
+  import { dbPromise } from '../base_datos/database.js';
   
   // Stores globales para estado de autenticación
   import { 
@@ -76,11 +77,30 @@
     contrasena: ''
   };
 
+  let datosRecuperacion = {
+    correo: '',
+    dui: '',
+    nuevaContrasena: '',
+    confirmarContrasena: ''
+  };
+
   // Objeto para guardar errores de validación por campo
   let errores = {};
   
   // Booleano: si mostrar contraseña en texto o punteada
   let mostrarContrasena = false;
+  let mostrarRecuperacion = false;
+  let mensajeRecuperacion = '';
+
+  function hashearContrasena(contrasena) {
+    let hash = 0;
+    for (let i = 0; i < contrasena.length; i++) {
+      const char = contrasena.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return `hash_${Math.abs(hash).toString(16)}`;
+  }
 
   // ========================================
   // CICLO DE VIDA
@@ -200,6 +220,58 @@
       establecerCargando(false);
     }
   }
+
+  async function recuperarContrasena(e) {
+    e.preventDefault();
+    limpiarErrores();
+    mensajeRecuperacion = '';
+
+    if (!datosRecuperacion.correo.trim() || !datosRecuperacion.dui.trim()) {
+      establecerError('Ingresa tu correo y DUI.');
+      return;
+    }
+
+    if (!datosRecuperacion.nuevaContrasena || datosRecuperacion.nuevaContrasena.length < 8) {
+      establecerError('La nueva contrasena debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (datosRecuperacion.nuevaContrasena !== datosRecuperacion.confirmarContrasena) {
+      establecerError('Las contrasenas no coinciden.');
+      return;
+    }
+
+    establecerCargando(true);
+
+    try {
+      const db = await dbPromise;
+      const usuario = await db.getFromIndex('usuarios', 'correo', datosRecuperacion.correo.trim().toLowerCase());
+
+      if (!usuario || usuario.dui !== datosRecuperacion.dui.trim()) {
+        establecerError('Correo o DUI incorrectos.');
+        return;
+      }
+
+      usuario.contrasena = hashearContrasena(datosRecuperacion.nuevaContrasena);
+      await db.put('usuarios', usuario);
+
+      mensajeRecuperacion = 'Contrasena actualizada. Ya puedes iniciar sesion.';
+      datos.correo = datosRecuperacion.correo.trim().toLowerCase();
+      datos.contrasena = '';
+      datosRecuperacion = {
+        correo: '',
+        dui: '',
+        nuevaContrasena: '',
+        confirmarContrasena: ''
+      };
+      mostrarRecuperacion = false;
+    } catch (error) {
+      console.error('Error recuperando contrasena:', error);
+      establecerError('No se pudo actualizar la contrasena.');
+    } finally {
+      establecerCargando(false);
+    }
+  }
 </script>
 
 <!-- ========================================
@@ -234,7 +306,105 @@
           </div>
         {/if}
 
+        {#if mensajeRecuperacion}
+          <div class="alerta alerta-exito" role="status">
+            <span class="texto-alerta">{mensajeRecuperacion}</span>
+          </div>
+        {/if}
+
         <!-- FORMULARIO -->
+        {#if mostrarRecuperacion}
+        <form on:submit={recuperarContrasena} novalidate>
+          <div class="campo-formulario">
+            <label for="recuperar-correo" class="etiqueta">Correo Electronico</label>
+            <div class="contenedor-entrada">
+              <input
+                id="recuperar-correo"
+                type="email"
+                class="entrada"
+                placeholder="tu.correo@ues.edu.sv"
+                bind:value={datosRecuperacion.correo}
+                disabled={$estaCargando}
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="campo-formulario">
+            <label for="recuperar-dui" class="etiqueta">DUI</label>
+            <div class="contenedor-entrada">
+              <input
+                id="recuperar-dui"
+                type="text"
+                class="entrada"
+                placeholder="12345678-9"
+                bind:value={datosRecuperacion.dui}
+                disabled={$estaCargando}
+                required
+              />
+            </div>
+          </div>
+
+          <div class="campo-formulario">
+            <label for="nueva-contrasena" class="etiqueta">Nueva contrasena</label>
+            <div class="contenedor-entrada">
+              <input
+                id="nueva-contrasena"
+                type="password"
+                class="entrada"
+                placeholder="Minimo 8 caracteres"
+                bind:value={datosRecuperacion.nuevaContrasena}
+                disabled={$estaCargando}
+                autocomplete="new-password"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="campo-formulario">
+            <label for="confirmar-contrasena" class="etiqueta">Confirmar contrasena</label>
+            <div class="contenedor-entrada">
+              <input
+                id="confirmar-contrasena"
+                type="password"
+                class="entrada"
+                placeholder="Repite tu nueva contrasena"
+                bind:value={datosRecuperacion.confirmarContrasena}
+                disabled={$estaCargando}
+                autocomplete="new-password"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="boton-login"
+            disabled={$estaCargando}
+            aria-busy={$estaCargando}
+          >
+            {#if $estaCargando}
+              <span class="spinner"></span>
+              Actualizando...
+            {:else}
+              Cambiar contrasena
+            {/if}
+          </button>
+
+          <button
+            type="button"
+            class="boton-registro"
+            on:click={() => {
+              mostrarRecuperacion = false;
+              limpiarErrores();
+            }}
+            disabled={$estaCargando}
+          >
+            Volver al inicio de sesion
+          </button>
+        </form>
+        {:else}
         <form on:submit={enviarFormulario} novalidate>
           
           <!-- CAMPO: CORREO -->
@@ -341,8 +511,19 @@
 
         <!-- ENLACE: RECUPERAR CONTRASEÑA -->
         <div class="enlaces-adicionales">
-          <button type="button" class="enlace-pequeño">Olvidaste tu contraseña?</button>
+          <button
+            type="button"
+            class="enlace-pequeño"
+            on:click={() => {
+              mostrarRecuperacion = true;
+              mensajeRecuperacion = '';
+              limpiarErrores();
+            }}
+          >
+            Olvidaste tu contraseña?
+          </button>
         </div>
+        {/if}
       </div>
     </div>
   </section>
@@ -390,7 +571,8 @@
 
   /* CONTENEDOR PRINCIPAL */
   .contenedor-login {
-    background: linear-gradient(135deg, #C41E3A 0%, #E01D3A 50%, #A01B2F 100%);
+    min-height: 100vh;
+    background: #990c14;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
@@ -485,6 +667,12 @@
     background: rgba(211, 47, 47, 0.1);
     border-color: var(--error);
     color: var(--error);
+  }
+
+  .alerta-exito {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--exito);
+    color: var(--exito);
   }
 
   .texto-alerta {
