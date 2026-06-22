@@ -28,7 +28,7 @@ export const ESTADOS_RECLAMO = [
 ];
 
 export const CATEGORIAS = [
-    "Carnés",
+    "Carnet",
     "Memorias USB",
     "Calculadoras",
     "Cuadernos",

@@ -51,7 +51,7 @@
       objetos = await enriquecerConReclamosAprobados(filtrados);
     } catch (error) {
       console.error(error);
-      mensaje = '❌ Error al cargar el historial';
+      mensaje = 'Error al cargar el historial';
     } finally {
       cargando = false;
     }
@@ -60,12 +60,12 @@
   async function cambiarEstado(id, nuevoEstado) {
     try {
       await actualizarEstado(id, nuevoEstado);
-      mensaje = '✅ Estado actualizado correctamente';
+      mensaje = 'Estado actualizado correctamente';
       cerrarModal();
       await cargarHistorial();
     } catch (error) {
       console.error(error);
-      mensaje = '❌ Error al actualizar el estado';
+      mensaje = 'Error al actualizar el estado';
     }
   }
 
@@ -103,24 +103,24 @@
 
     try {
       await eliminarObjeto(id);
-      mensaje = '✅ Publicación eliminada';
+      mensaje = 'Publicación eliminada';
       cerrarModal();
       await cargarHistorial();
     } catch (error) {
       console.error(error);
-      mensaje = '❌ Error al eliminar';
+      mensaje = 'Error al eliminar';
     }
   }
 
   async function restaurarPublicacion(id) {
     try {
       await restaurarObjeto(id);
-      mensaje = '✅ Publicación restaurada';
+      mensaje = 'Publicación restaurada';
       cerrarModal();
       await cargarHistorial();
     } catch (error) {
       console.error(error);
-      mensaje = '❌ Error al restaurar';
+      mensaje = 'Error al restaurar';
     }
   }
 
