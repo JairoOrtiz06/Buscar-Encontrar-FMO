@@ -1,6 +1,5 @@
 <script>
 
-
   import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
   import Navbar from '../componentes/Navbar.svelte';
   import Footer from '../componentes/Footer.svelte';
@@ -295,87 +294,6 @@
     background: #f4f6f8;
   }
 
-  .inicio-header {
-    background: #990c14;
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
-  }
-
-  .header-wrap {
-    width: min(1320px, 98%);
-    margin: 0 auto;
-    padding: 0.72rem 0;
-    display: grid;
-    grid-template-columns: minmax(260px, 1fr) 1fr minmax(760px, auto);
-    align-items: center;
-    column-gap: 0.25rem;
-  }
-
-  .header-left {
-    justify-self: start;
-    min-width: 0;
-  }
-
-  .hello-text {
-    margin: 0;
-    font-size: clamp(1rem, 1.45vw, 1.15rem);
-    font-weight: 800;
-    color: #fff;
-    white-space: nowrap;
-  }
-
-  .header-center {
-    min-height: 1px;
-  }
-
-  .header-right {
-    justify-self: end;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .nav-grid {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0.42rem;
-  }
-
-  .nav-btn {
-    border: 1px solid #fff;
-    background: transparent;
-    color: #fff;
-    font-weight: 700;
-    border-radius: 9px;
-    padding: 0.44rem 0.68rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1.1;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-
-  .nav-btn:hover,
-  .nav-btn.active {
-    background: #fff;
-    color: #990c14;
-  }
-
-  .logout-btn {
-    border: none;
-    background: #fff;
-    color: #990c14;
-    font-weight: 900;
-    border-radius: 9px;
-    padding: 0.5rem 0.9rem;
-    cursor: pointer;
-    line-height: 1.1;
-    white-space: nowrap;
-    font-size: 0.86rem;
-  }
-
   .publicar-main {
     flex: 1;
     width: min(1200px, 94%);
@@ -652,34 +570,6 @@
     color: #990c14;
   }
 
-  .inicio-footer {
-    border-top: 4px solid #990c14;
-    background: #1f1f24;
-    color: #f3f4f6;
-    padding: 1rem 0;
-  }
-
-  .footer-wrap {
-    width: min(1100px, 94%);
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .footer-wrap h4 {
-    margin: 0 0 0.2rem;
-    color: #fff;
-    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
-    font-weight: 900;
-    letter-spacing: 0.02em;
-  }
-
-  .footer-wrap p {
-    margin: 0;
-    color: #d1d5db;
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
   @media (min-width: 768px) {
     .col-md-6 {
       width: 50%;
@@ -696,55 +586,10 @@
     }
   }
 
-  @media (max-width: 1200px) and (min-width: 769px) {
-    .header-wrap {
-      grid-template-columns: 1fr;
-      row-gap: 0.7rem;
-    }
-
-    .header-left,
-    .header-right {
-      justify-self: center;
-    }
-
-    .header-right {
-      width: 100%;
-    }
-
-    .nav-grid {
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-  }
+ 
 
   @media (max-width: 768px) {
-    .header-wrap {
-      width: min(97%, 700px);
-      grid-template-columns: 1fr;
-      row-gap: 0.6rem;
-    }
-
-    .header-left,
-    .header-right {
-      justify-self: stretch;
-      width: 100%;
-    }
-
-    .hello-text {
-      white-space: normal;
-      line-height: 1.2;
-    }
-
-    .nav-grid {
-      justify-content: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .nav-btn,
-    .logout-btn {
-      flex: 1 1 calc(50% - 0.42rem);
-      text-align: center;
-    }
+   
 
     .publicar-main {
       width: min(96%, 700px);
