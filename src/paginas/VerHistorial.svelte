@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { getHistorialUsuario, actualizarEstado, eliminarObjeto, restaurarObjeto } from '../crud/objetos.js';
+  import { dbPromise } from '../base_datos/database.js';
   import { usuarioActual, logout } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
 
@@ -42,12 +43,12 @@
         return;
       }
 
-      if (filtroEstado === 'todos') {
-        objetos = await getHistorialUsuario(usuarioId);
-      } else {
-        const todos = await getHistorialUsuario(usuarioId);
-        objetos = todos.filter((objeto) => objeto.estado === filtroEstado);
-      }
+      const todos = await getHistorialUsuario(usuarioId);
+      const filtrados = filtroEstado === 'todos'
+        ? todos
+        : todos.filter((objeto) => objeto.estado === filtroEstado);
+
+      objetos = await enriquecerConReclamosAprobados(filtrados);
     } catch (error) {
       console.error(error);
       mensaje = '❌ Error al cargar el historial';
@@ -60,12 +61,41 @@
     try {
       await actualizarEstado(id, nuevoEstado);
       mensaje = '✅ Estado actualizado correctamente';
-      await cargarHistorial();
       cerrarModal();
+      await cargarHistorial();
     } catch (error) {
       console.error(error);
       mensaje = '❌ Error al actualizar el estado';
     }
+  }
+
+  async function enriquecerConReclamosAprobados(publicaciones) {
+    const db = await dbPromise;
+    const reclamos = await db.getAll('reclamos');
+
+    return Promise.all(
+      publicaciones.map(async (objeto) => {
+        if (objeto.estado !== 'reclamado') {
+          return objeto;
+        }
+
+        const reclamoAprobado = reclamos.find((reclamo) =>
+          reclamo.idObjeto === objeto.id && reclamo.estado === 'aprobado'
+        );
+
+        if (!reclamoAprobado) {
+          return objeto;
+        }
+
+        const reclamante = await db.get('usuarios', Number(reclamoAprobado.idSolicitante));
+
+        return {
+          ...objeto,
+          reclamoAprobado,
+          reclamante
+        };
+      })
+    );
   }
 
   async function eliminarPublicacion(id) {
@@ -132,6 +162,13 @@
       day: 'numeric'
     });
   }
+
+  function getContactoReclamante(objeto) {
+    return objeto.reclamoAprobado?.contacto
+      || objeto.reclamante?.telefono
+      || objeto.reclamante?.correo
+      || 'Contacto no disponible';
+  }
 </script>
 
 <main class="historial-layout">
@@ -174,9 +211,9 @@
     <article class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Mi actividad</p>
-          <h1>Mis publicaciones</h1>
-          <p class="panel-subtitle">Consulta y administra los objetos que has reportado.</p>
+          <p class="eyebrow">Mis publicaciones</p>
+          <h1>Historial de publicaciones</h1>
+          <p class="panel-subtitle">Consulta y administra los objetos que tú publicaste.</p>
         </div>
         <div class="summary-box" aria-label="Resumen de publicaciones">
           <span class="summary-number">{objetos.length}</span>
@@ -253,6 +290,13 @@
                     <span><strong>Ubicación:</strong> {objeto.ubicacion}</span>
                     <span><strong>Publicado:</strong> {formatearFecha(objeto.fechaPublicacion)}</span>
                   </div>
+
+                  {#if objeto.estado === 'reclamado'}
+                    <div class="claim-contact">
+                      <span><strong>Reclamado por:</strong> {objeto.reclamante?.nombre || 'Usuario no disponible'}</span>
+                      <span><strong>Contacto:</strong> {getContactoReclamante(objeto)}</span>
+                    </div>
+                  {/if}
                 </div>
 
                 <div class="card-actions">
@@ -299,32 +343,25 @@
 
       <div class="option-list">
         {#if objetoSeleccionado.estado === 'pendiente'}
-          <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'reclamado')}>
-            Marcar como reclamado
-          </button>
           <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'entregado')}>
             Marcar como entregado
+          </button>
+          <button type="button" class="option-btn danger" on:click={() => eliminarPublicacion(objetoSeleccionado.id)}>
+            Eliminar publicacion
           </button>
         {:else if objetoSeleccionado.estado === 'reclamado'}
           <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'entregado')}>
             Confirmar entrega
           </button>
-          <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'pendiente')}>
-            Cancelar reclamo
-          </button>
         {:else if objetoSeleccionado.estado === 'entregado'}
-          <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'archivado')}>
-            Archivar publicación
+          <button type="button" class="option-btn danger" on:click={() => eliminarPublicacion(objetoSeleccionado.id)}>
+            Eliminar publicacion
           </button>
         {:else if objetoSeleccionado.estado === 'eliminado'}
           <button type="button" class="option-btn" on:click={() => restaurarPublicacion(objetoSeleccionado.id)}>
             Restaurar publicación
           </button>
         {/if}
-
-        <button type="button" class="option-btn danger" on:click={() => eliminarPublicacion(objetoSeleccionado.id)}>
-          Eliminar publicación
-        </button>
       </div>
 
       <button type="button" class="btn btn-secondary modal-cancel" on:click={cerrarModal}>Cerrar</button>
@@ -673,6 +710,23 @@
     color: #374151;
   }
 
+  .claim-contact {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.7rem;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+
+  .claim-contact strong {
+    color: #14532d;
+  }
+
   .options-btn,
   .modal-close {
     display: grid;
@@ -811,17 +865,18 @@
 
   .modal-backdrop {
     position: absolute;
+    z-index: 0;
     inset: 0;
     width: 100%;
     height: 100%;
     border: 0;
-    background: rgba(15, 23, 42, 0.68);
+    background: rgba(15, 23, 42, 0.32);
     cursor: default;
   }
 
   .modal-card {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     width: min(430px, 100%);
     margin: 0;
     border: 0;

@@ -4,9 +4,10 @@
   import Navbar from '../componentes/Navbar.svelte';
   import Footer from '../componentes/Footer.svelte';
   import { usuarioActual } from '../stores/authStore.js';
+  import { irA } from '../stores/navegacionStore.js';
 
   const categorias = [
-    { valor: 'carnés', label: 'Carnés' },
+    { valor: 'carnet', label: 'Carnet' },
     { valor: 'memorias usb', label: 'Memorias USB' },
     { valor: 'calculadoras', label: 'Calculadoras' },
     { valor: 'cuadernos', label: 'Cuadernos' },
@@ -92,7 +93,7 @@
 
     if (verificacion.duplicado) {
       duplicadoDetectado = true;
-      mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
+      mensaje = ' Ya existe un objeto con información similar. No se puede duplicar.';
       return;
     }
 
@@ -115,17 +116,17 @@
 
       await crearObjeto(objeto);
 
-      mensaje = '✅ Objeto publicado correctamente';
+      mensaje = ' Objeto publicado correctamente';
 
-      setTimeout(() => (window.location.href = '/'), 1500);
+      setTimeout(() => irA('inicio'), 1500);
     } catch (error) {
       console.error(error);
 
       if (error.message === 'DUPLICADO') {
         duplicadoDetectado = true;
-        mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
+        mensaje = ' Ya existe un objeto con información similar. No se puede duplicar.';
       } else {
-        mensaje = '❌ Error al guardar el objeto';
+        mensaje = ' Error al guardar el objeto';
       }
     } finally {
       guardando = false;
@@ -162,6 +163,10 @@
 
             <div class="card-body">
               <form class="form-grid" on:submit|preventDefault={guardarObjeto}>
+                <div class="publisher-note">
+                  Publicaras como: <strong>{$usuarioActual?.nombre || 'Usuario actual'}</strong>
+                </div>
+
                 <section class="form-section">
                   <h2 class="section-title">Datos principales</h2>
 
@@ -379,6 +384,19 @@
   .form-grid {
     display: grid;
     gap: 1rem;
+  }
+
+  .publisher-note {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+    background: #fff7f7;
+    color: #374151;
+    font-weight: 700;
+  }
+
+  .publisher-note strong {
+    color: #990c14;
   }
 
   .form-section {

@@ -5,8 +5,11 @@
   import Navbar from '../componentes/Navbar.svelte';
   import Footer from '../componentes/Footer.svelte';
 
-  let totalPublicaciones = 0;
+  let publicacionesPendientes = 0;
+  let publicacionesReclamadas = 0;
+  let publicacionesEntregadas = 0;
   let totalReclamos = 0;
+  let reclamosAprobados = 0;
   let cargandoResumen = true;
 
   onMount(async () => {
@@ -18,8 +21,11 @@
 
     try {
       if (!$usuarioActual?.id) {
-        totalPublicaciones = 0;
+        publicacionesPendientes = 0;
+        publicacionesReclamadas = 0;
+        publicacionesEntregadas = 0;
         totalReclamos = 0;
+        reclamosAprobados = 0;
         return;
       }
 
@@ -29,18 +35,27 @@
         db.getAll('reclamos')
       ]);
 
-      totalPublicaciones = objetos.filter((objeto) =>
-        String(objeto.idUsuario) === String($usuarioActual.id) &&
-        objeto.estado !== 'eliminado'
-      ).length;
+      const misObjetos = objetos.filter((objeto) =>
+        String(objeto.idUsuario) === String($usuarioActual.id)
+      );
 
-      totalReclamos = reclamos.filter((reclamo) =>
+      publicacionesPendientes = misObjetos.filter((objeto) => objeto.estado === 'pendiente').length;
+      publicacionesReclamadas = misObjetos.filter((objeto) => objeto.estado === 'reclamado').length;
+      publicacionesEntregadas = misObjetos.filter((objeto) => objeto.estado === 'entregado').length;
+
+      const misReclamos = reclamos.filter((reclamo) =>
         String(reclamo.idSolicitante) === String($usuarioActual.id)
-      ).length;
+      );
+
+      totalReclamos = misReclamos.length;
+      reclamosAprobados = misReclamos.filter((reclamo) => reclamo.estado === 'aprobado').length;
     } catch (error) {
       console.error('Error cargando resumen de inicio:', error);
-      totalPublicaciones = 0;
+      publicacionesPendientes = 0;
+      publicacionesReclamadas = 0;
+      publicacionesEntregadas = 0;
       totalReclamos = 0;
+      reclamosAprobados = 0;
     } finally {
       cargandoResumen = false;
     }
@@ -62,6 +77,12 @@
           <p>Bienvenido, {$usuarioActual?.nombre}. Tu sesión está activa.</p>
         </div>
 
+        {#if !cargandoResumen && reclamosAprobados > 0}
+          <div class="approved-notice">
+            Tienes {reclamosAprobados} reclamo{reclamosAprobados === 1 ? '' : 's'} aprobado{reclamosAprobados === 1 ? '' : 's'} pendiente{reclamosAprobados === 1 ? '' : 's'} de seguimiento.
+          </div>
+        {/if}
+
         <div class="status-grid">
           <article class="status-card">
             <p class="label">Tipo de usuario</p>
@@ -74,12 +95,22 @@
           </article>
 
           <article class="status-card">
-            <p class="label">Mis publicaciones</p>
-            <p class="value summary">{cargandoResumen ? '...' : totalPublicaciones}</p>
+            <p class="label">Publicaciones pendientes</p>
+            <p class="value pending">{cargandoResumen ? '...' : publicacionesPendientes}</p>
           </article>
 
           <article class="status-card">
-            <p class="label">Mis reclamos</p>
+            <p class="label">Publicaciones reclamadas</p>
+            <p class="value claimed">{cargandoResumen ? '...' : publicacionesReclamadas}</p>
+          </article>
+
+          <article class="status-card">
+            <p class="label">Publicaciones entregadas</p>
+            <p class="value delivered">{cargandoResumen ? '...' : publicacionesEntregadas}</p>
+          </article>
+
+          <article class="status-card">
+            <p class="label">Reclamos enviados</p>
             <p class="value summary">{cargandoResumen ? '...' : totalReclamos}</p>
           </article>
         </div>
@@ -151,8 +182,19 @@
 
   .status-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
+  }
+
+  .approved-notice {
+    margin-bottom: 1rem;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: #f0fdf4;
+    color: #166534;
+    font-weight: 800;
+    text-align: center;
   }
 
   .status-card {
@@ -190,6 +232,18 @@
     color: #1f2937;
   }
 
+  .pending {
+    color: #15803d;
+  }
+
+  .claimed {
+    color: #a16207;
+  }
+
+  .delivered {
+    color: #1d4ed8;
+  }
+
   .notice {
     margin-top: 1.2rem;
     border-radius: 12px;
@@ -198,5 +252,17 @@
     color: #fff;
     font-weight: 700;
     text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .status-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .status-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

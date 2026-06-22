@@ -15,6 +15,13 @@
         idUsuario: string | number | null;
     };
 
+    type UsuarioContacto = {
+        id: number | string;
+        nombre?: string;
+        correo?: string;
+        telefono?: string;
+    };
+
     export let objeto: ObjetoReclamable | null = {
         id: null,
         titulo: "",
@@ -61,10 +68,18 @@
             );
 
             misReclamos = await Promise.all(
-                reclamosUsuario.map(async (reclamo) => ({
-                    ...reclamo,
-                    objeto: await db.get('objetos', reclamo.idObjeto)
-                }))
+                reclamosUsuario.map(async (reclamo) => {
+                    const objeto = await db.get('objetos', reclamo.idObjeto);
+                    const publicador = objeto?.idUsuario != null
+                        ? await db.get('usuarios', Number(objeto.idUsuario))
+                        : null;
+
+                    return {
+                        ...reclamo,
+                        objeto,
+                        publicador
+                    };
+                })
             );
 
             misReclamos = misReclamos.sort(
@@ -94,10 +109,15 @@
         }
     }
 
+    function getContactoUsuario(usuario: UsuarioContacto | null | undefined) {
+        if (!usuario) return 'Contacto no disponible';
+        return usuario.telefono || usuario.correo || 'Contacto no disponible';
+    }
+
     function getMensajeEstado(estado: string) {
         switch (estado) {
             case 'aprobado':
-                return 'Tu reclamo fue aprobado. Acercate a administracion para continuar el proceso.';
+                return 'Tu reclamo fue aprobado. Contacta a la persona que publico el objeto para coordinar la entrega.';
             case 'rechazado':
                 return 'Tu reclamo fue rechazado por administracion.';
             default:
@@ -433,6 +453,20 @@
                               <div class="alert alert-light border mb-0">
                                 {getMensajeEstado(reclamo.estado)}
                               </div>
+
+                              {#if reclamo.estado === 'aprobado'}
+                                <div class="alert alert-success border mt-3 mb-0">
+                                  <p class="fw-bold mb-1">Datos para coordinar la entrega</p>
+                                  <p class="mb-1">
+                                    <strong>Publicado por:</strong>
+                                    {reclamo.publicador?.nombre || 'Usuario no disponible'}
+                                  </p>
+                                  <p class="mb-0">
+                                    <strong>Contacto:</strong>
+                                    {getContactoUsuario(reclamo.publicador)}
+                                  </p>
+                                </div>
+                              {/if}
                             </div>
                           </div>
                         </article>

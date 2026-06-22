@@ -427,7 +427,7 @@
         alert('Registro completado. Tu cuenta está pendiente de aprobación. Serás notificado por correo cuando sea aprobada.');
         
         // Redirigir a login
-        window.location.href = '/login';
+        irAlLogin();
       } else {
         // Registro falló
         establecerError(resultado.mensaje);
@@ -481,7 +481,7 @@
 
         <!-- Enlace para volver a login -->
         <div class="enlace-volver">
-          <p>Ya tienes cuenta? <a href="/login">Inicia sesion aqui</a></p>
+          <p>Ya tienes cuenta? <button type="button" class="enlace-login" on:click={irAlLogin}>Inicia sesion aqui</button></p>
         </div>
       </div>
     </section>
@@ -979,7 +979,7 @@
 
         <!-- Enlace para volver a login -->
         <div class="enlace-volver">
-          <p>Ya tienes cuenta? <a href="/login">Inicia sesion aqui</a></p>
+          <p>Ya tienes cuenta? <button type="button" class="enlace-login" on:click={irAlLogin}>Inicia sesion aqui</button></p>
         </div>
       </div>
     </section>
@@ -1478,13 +1478,18 @@
     color: var(--texto-secundario);
   }
 
-  .enlace-volver a {
+  .enlace-login {
+    border: 0;
+    padding: 0;
+    background: transparent;
     color: var(--primario);
+    font: inherit;
     text-decoration: none;
     font-weight: 600;
+    cursor: pointer;
   }
 
-  .enlace-volver a:hover {
+  .enlace-login:hover {
     text-decoration: underline;
   }
 
