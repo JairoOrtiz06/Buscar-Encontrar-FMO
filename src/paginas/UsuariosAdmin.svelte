@@ -1,11 +1,15 @@
 <script lang="ts">
     import { dbPromise } from '../base_datos/database.js';
     import { onMount } from 'svelte';
+    import { DEPARTAMENTOS_CARRERAS }from '../servicios/registerService.js';
     // importar validaciones 
     import {
     validarNombre,
     validarCorreo,
-    validarCarnet } from '../utilidades/validaciones.js';
+    validarCarnet ,validarDUI,validarCodigoInstitucional} from '../utilidades/validaciones.js';
+    import {
+    validarTelefono
+} from '../utilidades/validaciones.js';
 
     // variables 
     let pestaña = "usuarios";
@@ -220,6 +224,33 @@
                 return;
             }
         }
+        const validDui =
+        validarDUI(
+                usuarioEditando.dui
+            );
+
+        if (!validDui.valido) {
+
+            if (!validDui.valido) {
+                if (validDui.error) {
+                    mostrarNotificacion(validDui.error);
+                }
+                return;
+            }
+            return;
+        }
+        const validCodigo =
+            validarCodigoInstitucional(
+                usuarioEditando.codigoInstitucional
+            );
+
+        if (!validCodigo.valido) {
+            if (validCodigo.error) {
+                mostrarNotificacion(validCodigo.error);
+            }
+            return;
+        }
+
 
         // Evitar correos duplicados
         const correoExiste =
@@ -259,12 +290,27 @@
                 return;
             }
         }
+        const validTelefono =
+            validarTelefono(
+                usuarioEditando.telefono
+            );
+
+        if (!validTelefono.valido) {
+
+            
+            if(validTelefono.error){
+                mostrarNotificacion(validTelefono.error);
+            }
+
+            return;
+        }
         const db = await dbPromise;
 
         await db.put(
             'usuarios',
             usuarioEditando
         );
+        console.log('Guardado:', usuarioEditando);
 
         await cargarUsuarios();
 
@@ -391,41 +437,219 @@
 
                 <div class="modal-body">
 
-                    <div class="mb-3">
+                    
+                <!--Parte del estudiante-->
+                {#if usuarioEditando.tipo === 'estudiante'}
 
-                        <label class="form-label">
-                            Nombre
-                        </label>
+                <div class="mb-3">
 
-                        <input
-                            class="form-control"
-                            bind:value={usuarioEditando.nombre}>
+                    <label class="form-label">
+                        Carnet
+                    </label>
 
-                    </div>
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.carnet}
+                        readonly>
 
-                    <div class="mb-3">
+                </div>
 
-                        <label class="form-label">
-                            Correo
-                        </label>
+                <div class="mb-3">
 
-                        <input
-                            class="form-control"
-                            bind:value={usuarioEditando.correo}>
+                    <label class="form-label">
+                        Carrera
+                    </label>
 
-                    </div>
+                    <select
+                        class="form-select"
+                        bind:value={usuarioEditando.carrera}>
 
-                    <div class="mb-3">
+                        {#each Object.values(DEPARTAMENTOS_CARRERAS).flat() as carrera}
 
-                        <label class="form-label">
-                            Carnet
-                        </label>
+                            <option value={carrera}>
+                                {carrera}
+                            </option>
 
-                        <input
-                            class="form-control"
-                            bind:value={usuarioEditando.carnet}>
+                        {/each}
 
-                    </div>
+                    </select>
+
+                </div>
+
+                <!--Codigo para docente -->
+                {:else if usuarioEditando.tipo === 'docente'}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Nombre
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.nombre}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Correo
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        bind:value={usuarioEditando.correo}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        DUI
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.dui}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.telefono}
+                        maxlength="8">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Código Institucional
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.codigoInstitucional}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Departamento
+                    </label>
+
+                    <select
+                        class="form-select"
+                        bind:value={usuarioEditando.departamento}>
+
+                        {#each Object.keys(DEPARTAMENTOS_CARRERAS) as departamento}
+
+                            <option value={departamento}>
+                                {departamento}
+                            </option>
+
+                        {/each}
+
+                    </select>
+
+                </div>
+                
+                <!-- Personal de administracion y demas ramas de la facultad -->
+                {:else if [
+                    'administrativo',
+                    'vigilante',
+                    'mantenimiento',
+                    'limpieza'
+                ].includes(usuarioEditando.tipo)}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Nombre
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.nombre}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Correo
+                    </label>
+
+                    <input
+                        type="email"
+                        class="form-control"
+                        bind:value={usuarioEditando.correo}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        DUI
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.dui}>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.telefono}
+                        maxlength="8">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Código Institucional
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.codigoInstitucional}>
+
+                </div>
+
+                {#if usuarioEditando.tipo === 'administrativo'}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Área de Oficina
+                    </label>
+
+                    <input
+                        class="form-control"
+                        bind:value={usuarioEditando.areaOficina}>
+
+                </div>
+
+                {/if}
+
+                {/if}
 
                 </div>
 
@@ -444,7 +668,7 @@
                     </button>
 
                 </div>
-
+                
             </div>
 
         </div>
@@ -482,7 +706,7 @@
             <tr>
                 <th>Nombre</th>
                 <th>Correo</th>
-                <th>Carnet</th>
+                <th>Identificación</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
@@ -501,7 +725,11 @@
 
                     <td>{usuario.correo}</td>
 
-                    <td>{usuario.carnet}</td>
+                    <td>
+                        {usuario.tipo === 'estudiante'
+                            ? usuario.carnet
+                            : usuario.codigoInstitucional}
+                    </td>
 
                     <td>
 
