@@ -154,14 +154,14 @@
       <div class="row g-3 g-lg-4">
         <div class="col-12 col-lg-8">
           <article class="card border-0 shadow-sm overflow-hidden">
-            <div class="card-header text-bg-danger p-3">
+            <div class="card-header text-white p-3" style="background-color: #990c14;">
               <h1 class="h4 fw-bold mb-1">Publicar Objeto</h1>
               <p class="small text-white-50 mb-0">Completa los datos para registrar un hallazgo.</p>
             </div>
 
             <div class="card-body p-3 p-md-4">
               <form class="vstack gap-3" on:submit|preventDefault={guardarObjeto}>
-                <div class="alert alert-danger-subtle border border-danger-subtle fw-semibold mb-0">
+                <div class="alert bg-white fw-semibold mb-0" style="border-color: #990c14;">
                   Publicaras como: <strong>{$usuarioActual?.nombre || 'Usuario actual'}</strong>
                 </div>
 
@@ -170,7 +170,7 @@
 
                   <div class="mb-3">
                     <label for="titulo" class="form-label fw-semibold">
-                      Titulo <span class="text-danger">*</span>
+                      Titulo <span style="color: #990c14;">*</span>
                     </label>
                     <input
                       id="titulo"
@@ -201,7 +201,7 @@
                   <div class="row g-3">
                     <div class="col-12 col-md-6">
                       <label for="categoria" class="form-label fw-semibold">
-                        Categoria <span class="text-danger">*</span>
+                        Categoria <span style="color: #990c14;">*</span>
                       </label>
                       <select id="categoria" class="form-select" bind:value={categoria} required>
                         {#each categorias as cat}
@@ -212,7 +212,7 @@
 
                     <div class="col-12 col-md-6">
                       <label for="ubicacion" class="form-label fw-semibold">
-                        Ubicacion donde lo encontraste <span class="text-danger">*</span>
+                        Ubicacion donde lo encontraste <span style="color: #990c14;">*</span>
                       </label>
                       <input
                         id="ubicacion"
@@ -270,7 +270,7 @@
                 {/if}
 
                 <div class="d-grid d-md-flex justify-content-md-end">
-                  <button type="submit" class="btn btn-danger btn-lg fw-bold px-4" disabled={guardando}>
+                  <button type="submit" class="btn btn-lg fw-bold px-4 text-white" style="background-color: #990c14; border-color: #990c14;" disabled={guardando}>
                     {guardando ? 'Guardando...' : 'Publicar'}
                   </button>
                 </div>

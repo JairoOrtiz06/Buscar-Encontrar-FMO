@@ -559,13 +559,13 @@
   }
 
   .logo-ues {
-    height: 120px;
+    height: clamp(160px, 18vw, 230px);
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
     border: 3px solid white;
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 14px;
+    padding: 10px;
     background: white;
   }
 

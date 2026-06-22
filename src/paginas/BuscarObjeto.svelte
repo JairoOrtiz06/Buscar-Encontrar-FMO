@@ -109,7 +109,7 @@
                   aria-label="Seleccionar categoría"
                 >
                   <option value="Todas">Todas las categorías</option>
-                  <option value="carnés">Carnet</option>
+                  <option value="carnet">Carnet</option>
                   <option value="memorias usb">Memorias USB</option>
                   <option value="calculadoras">Calculadoras</option>
                   <option value="cuadernos">Cuadernos</option>

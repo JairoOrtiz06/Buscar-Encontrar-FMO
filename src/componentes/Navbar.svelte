@@ -41,7 +41,7 @@
             irA('login');
           }}
         >
-          Salir
+          Cerrar sesion
         </button>
       </nav>
     </div>
@@ -137,9 +137,19 @@
   }
 
   .logout-btn {
-    margin-left: 0.08rem;
-    background: rgba(255, 255, 255, 0.24);
+    margin-left: 0.55rem;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
     font-weight: 800;
+    box-shadow: none;
+  }
+
+  .logout-btn:hover {
+    border-color: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(55, 2, 6, 0.14);
   }
 
   .nav-btn:focus-visible,
@@ -169,8 +179,18 @@
     }
 
     .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       justify-content: center;
-      flex-wrap: wrap;
+      width: min(620px, 100%);
+      margin: 0 auto;
+    }
+
+    .nav-btn,
+    .logout-btn {
+      width: 100%;
+      margin-left: 0;
+      text-align: center;
     }
   }
 
@@ -178,7 +198,8 @@
     .header-wrap {
       width: min(97%, 700px);
       grid-template-columns: 1fr;
-      row-gap: 0.6rem;
+      row-gap: 0.75rem;
+      padding: 0.85rem 0;
     }
 
     .header-left,
@@ -188,21 +209,36 @@
     }
 
     .hello-text {
-      text-align: left;
+      text-align: center;
       white-space: normal;
       line-height: 1.2;
     }
 
     .nav-grid {
-      justify-content: flex-start;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.42rem;
+      width: 100%;
     }
 
     .nav-btn,
     .logout-btn {
-      flex: 1 1 calc(50% - 0.42rem);
+      width: 100%;
+      min-height: 2.05rem;
+      margin-left: 0;
+      padding: 0.45rem 0.55rem;
+      font-size: 0.78rem;
       text-align: center;
+    }
+
+    .logout-btn {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .nav-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
