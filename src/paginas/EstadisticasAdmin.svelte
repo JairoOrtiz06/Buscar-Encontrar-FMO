@@ -115,3 +115,18 @@
 
 }
 </style>
+<footer class=" bg-danger text-white text-center p-3 rounded mt-4">
+
+    <p class="mb-1">
+        © 2026 Encuentra UES-FMO
+    </p>
+
+    <p class="mb-1">
+        Sistema de Gestión de Objetos Perdidos y Encontrados
+    </p>
+
+    <p class="mb-0">
+        Universidad de El Salvador - Facultad Multidisciplinaria Oriental
+    </p>
+
+</footer>
