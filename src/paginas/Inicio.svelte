@@ -1,7 +1,50 @@
 <script>
+  import { onMount } from 'svelte';
   import { usuarioActual } from '../stores/authStore.js';
+  import { dbPromise } from '../base_datos/database.js';
   import Navbar from '../componentes/Navbar.svelte';
   import Footer from '../componentes/Footer.svelte';
+
+  let totalPublicaciones = 0;
+  let totalReclamos = 0;
+  let cargandoResumen = true;
+
+  onMount(async () => {
+    await cargarResumen();
+  });
+
+  async function cargarResumen() {
+    cargandoResumen = true;
+
+    try {
+      if (!$usuarioActual?.id) {
+        totalPublicaciones = 0;
+        totalReclamos = 0;
+        return;
+      }
+
+      const db = await dbPromise;
+      const [objetos, reclamos] = await Promise.all([
+        db.getAll('objetos'),
+        db.getAll('reclamos')
+      ]);
+
+      totalPublicaciones = objetos.filter((objeto) =>
+        String(objeto.idUsuario) === String($usuarioActual.id) &&
+        objeto.estado !== 'eliminado'
+      ).length;
+
+      totalReclamos = reclamos.filter((reclamo) =>
+        String(reclamo.idSolicitante) === String($usuarioActual.id)
+      ).length;
+    } catch (error) {
+      console.error('Error cargando resumen de inicio:', error);
+      totalPublicaciones = 0;
+      totalReclamos = 0;
+    } finally {
+      cargandoResumen = false;
+    }
+  }
 </script>
 
 <main class="inicio-layout">
@@ -32,12 +75,12 @@
 
           <article class="status-card">
             <p class="label">Mis publicaciones</p>
-            <p class="value summary">{$usuarioActual?.totalPublicaciones ?? 0}</p>
+            <p class="value summary">{cargandoResumen ? '...' : totalPublicaciones}</p>
           </article>
 
           <article class="status-card">
             <p class="label">Mis reclamos</p>
-            <p class="value summary">{$usuarioActual?.totalReclamos ?? 0}</p>
+            <p class="value summary">{cargandoResumen ? '...' : totalReclamos}</p>
           </article>
         </div>
 
