@@ -1,4 +1,6 @@
 <script>
+
+
   import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
   import { usuarioActual, logout } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
@@ -24,7 +26,6 @@
     { valor: 'otros', label: 'Otros' }
   ];
 
-  // Form state
   let titulo = '';
   let descripcion = '';
   let categoria = 'otros';
@@ -35,9 +36,8 @@
   let mensaje = '';
   let duplicadoDetectado = false;
 
-  // Procesa la imagen seleccionada
   function procesarImagen(evento) {
-    const archivo = evento.target?.files && evento.target.files[0];
+    const archivo = evento.target.files[0];
     if (!archivo) return;
 
     if (!archivo.type.startsWith('image/')) {
@@ -51,6 +51,7 @@
     }
 
     foto = archivo;
+
     const lector = new FileReader();
     lector.onload = (e) => (vistaPrevia = e.target.result);
     lector.readAsDataURL(archivo);
@@ -94,7 +95,7 @@
 
     if (verificacion.duplicado) {
       duplicadoDetectado = true;
-      mensaje = ' Ya existe un objeto con información similar. No se puede duplicar.';
+      mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
       return;
     }
 
@@ -106,35 +107,26 @@
         imagenBase64 = await convertirImagenABase64(foto);
       }
 
-      if (!$usuarioActual?.id) {
-        mensaje = 'Debes iniciar sesión para publicar el objeto.';
-        guardando = false;
-        return;
-      }
-
       const objeto = {
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
         categoria: categoria,
         ubicacion: ubicacion.trim(),
         foto: imagenBase64,
-        idUsuario: $usuarioActual.id
+        idUsuario: 1
       };
 
       await crearObjeto(objeto);
 
-      mensaje = 'Objeto publicado correctamente';
+      mensaje = '✅ Objeto publicado correctamente';
 
-      // Volver a inicio usando el enrutador interno
-      setTimeout(() => irA('inicio'), 1500);
+      setTimeout(() => (window.location.href = '/'), 1500);
     } catch (error) {
       console.error(error);
 
-      if (error?.message === 'DUPLICADO') {
+      if (error.message === 'DUPLICADO') {
         duplicadoDetectado = true;
         mensaje = '⚠️ Ya existe un objeto con información similar. No se puede duplicar.';
-      } else if (error?.message === 'USUARIO_NO_VALIDO') {
-        mensaje = '❌ Usuario no válido. Inicia sesión de nuevo.';
       } else {
         mensaje = '❌ Error al guardar el objeto';
       }
