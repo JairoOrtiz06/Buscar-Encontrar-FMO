@@ -342,13 +342,13 @@
   .inicio-header {
     background: #990c14;
     color: #fff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 6px 20px rgba(64, 3, 8, 0.2);
   }
 
   .header-wrap {
     width: min(1320px, 98%);
     margin: 0 auto;
-    padding: 0.72rem 0;
+    padding: 1rem 0;
     display: grid;
     grid-template-columns: minmax(260px, 1fr) 1fr minmax(760px, auto);
     align-items: center;
@@ -386,35 +386,54 @@
 
   .nav-btn,
   .logout-btn {
-    border-radius: 9px;
-    padding: 0.44rem 0.68rem;
+    min-height: 2.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 0.52rem 0.78rem;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
     font-family: inherit;
     font-size: 0.85rem;
     font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-
-  .nav-btn {
-    border: 1px solid #fff;
-    background: transparent;
-    color: #fff;
+    box-shadow: 0 2px 8px rgba(55, 2, 6, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
   }
 
   .nav-btn:hover,
+  .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 5px 13px rgba(55, 2, 6, 0.18);
+    transform: translateY(-1px);
+  }
+
   .nav-btn.active {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(255, 255, 255, 0.7);
     color: #990c14;
+    box-shadow: 0 4px 12px rgba(55, 2, 6, 0.16);
   }
 
   .logout-btn {
-    border: 1px solid #fff;
-    background: #fff;
-    color: #990c14;
-    padding-inline: 0.9rem;
-    font-weight: 900;
+    margin-left: 0.08rem;
+    background: rgba(255, 255, 255, 0.24);
+    font-weight: 800;
+  }
+
+  .nav-btn:focus-visible,
+  .logout-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 2px;
   }
 
   .historial-main {

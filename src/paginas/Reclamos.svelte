@@ -4,7 +4,7 @@
     import Navbar from '../componentes/Navbar.svelte';
     import Footer from '../componentes/Footer.svelte';
 
-    export let objeto: {
+    type ObjetoReclamable = {
         id: number | null;
         titulo: string;
         categoria: string;
@@ -12,7 +12,9 @@
         fechaPublicacion: string;
         foto: string;
         idUsuario: string | number | null;
-    } = {
+    };
+
+    export let objeto: ObjetoReclamable | null = {
         id: null,
         titulo: "",
         categoria: "",
@@ -24,7 +26,7 @@
 
     let usuarioIdActual: string = '';
     $: usuarioIdActual = String($usuarioActual?.id ?? '');
-    $: esPropietario = objeto.idUsuario != null && String(objeto.idUsuario) === usuarioIdActual;
+    $: esPropietario = objeto?.idUsuario != null && String(objeto.idUsuario) === usuarioIdActual;
 
     export let volver: () => void = () => {};
 
@@ -302,7 +304,6 @@
 
   <Footer />
 </main>
-
 
 
 
