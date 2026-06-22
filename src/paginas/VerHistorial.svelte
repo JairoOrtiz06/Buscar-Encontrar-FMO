@@ -59,6 +59,14 @@
 
   async function cambiarEstado(id, nuevoEstado) {
     try {
+      const objeto = objetos.find((item) => item.id === id);
+
+      if (nuevoEstado === 'entregado' && objeto?.estado !== 'reclamado') {
+        mensaje = 'Solo puedes marcar como entregado un objeto que ya fue reclamado';
+        cerrarModal();
+        return;
+      }
+
       await actualizarEstado(id, nuevoEstado);
       mensaje = 'Estado actualizado correctamente';
       cerrarModal();
@@ -343,9 +351,6 @@
 
       <div class="option-list">
         {#if objetoSeleccionado.estado === 'pendiente'}
-          <button type="button" class="option-btn" on:click={() => cambiarEstado(objetoSeleccionado.id, 'entregado')}>
-            Marcar como entregado
-          </button>
           <button type="button" class="option-btn danger" on:click={() => eliminarPublicacion(objetoSeleccionado.id)}>
             Eliminar publicacion
           </button>

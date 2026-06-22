@@ -11,6 +11,8 @@
   let categoria: string = "Todas";
   let objetos: any[] = [];
   let usuarioIdActual: string = '';
+  let imagenAmpliada: string | null = null;
+  let tituloImagenAmpliada: string = '';
   $: usuarioIdActual = String($usuarioActual?.id ?? '');
 
   async function cargarObjetos() {
@@ -53,6 +55,16 @@
 
     return coincideNombre && coincideCategoria && !perteneceAlUsuarioActual && estaDisponible;
   });
+
+  function abrirImagen(src: string, titulo: string) {
+    imagenAmpliada = src;
+    tituloImagenAmpliada = titulo;
+  }
+
+  function cerrarImagen() {
+    imagenAmpliada = null;
+    tituloImagenAmpliada = '';
+  }
 </script>
 
 <main class="min-vh-100" style="background-color: #f1f3f5;">
@@ -126,21 +138,26 @@
         </div>
 
         {#if objetosFiltrados.length > 0}
-          <div class="row g-4">
+          <div class="resultados-grid">
             {#each objetosFiltrados as objeto}
-              <div class="col-12 col-md-6 col-xl-4">
-                <article class="card h-100 border-0 shadow-sm">
+              <div>
+                <article class="card resultado-card h-100 border-0 shadow-sm">
                   {#if objeto.foto}
-                    <img
-                      src={objeto.foto}
-                      alt={objeto.titulo}
-                      class="card-img-top object-fit-cover mb-3"
-                      style="height: 220px; object-fit: cover; width: 100%; margin-bottom: 1rem;"
-                    />
+                    <button
+                      type="button"
+                      class="imagen-btn"
+                      aria-label={`Ver foto de ${objeto.titulo}`}
+                      on:click={() => abrirImagen(objeto.foto, objeto.titulo)}
+                    >
+                      <img
+                        src={objeto.foto}
+                        alt={objeto.titulo}
+                        class="card-img-top resultado-img object-fit-cover mb-3"
+                      />
+                    </button>
                   {:else}
                     <div
-                      class="d-flex align-items-center justify-content-center bg-light text-secondary border-bottom"
-                      style="height: 220px;"
+                      class="resultado-img d-flex align-items-center justify-content-center bg-light text-secondary border-bottom"
                     >
                       Sin imagen
                     </div>
@@ -224,3 +241,143 @@
   </section>
   <Footer />
 </main>
+
+{#if imagenAmpliada}
+  <div class="imagen-modal">
+    <button type="button" class="imagen-backdrop" aria-label="Cerrar imagen" on:click={cerrarImagen}></button>
+    <dialog open class="imagen-dialog" aria-label={`Foto de ${tituloImagenAmpliada}`}>
+      <div class="imagen-modal-header">
+        <h2>{tituloImagenAmpliada}</h2>
+        <button type="button" class="cerrar-imagen" aria-label="Cerrar imagen" on:click={cerrarImagen}>x</button>
+      </div>
+      <img src={imagenAmpliada} alt={tituloImagenAmpliada} class="imagen-ampliada" />
+    </dialog>
+  </div>
+{/if}
+
+<style>
+  .resultados-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .resultado-card {
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .imagen-btn {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: zoom-in;
+  }
+
+  .imagen-btn:focus-visible {
+    outline: 3px solid rgba(153, 12, 20, 0.35);
+    outline-offset: -3px;
+  }
+
+  .resultado-img {
+    width: 100%;
+    height: 230px;
+    object-fit: contain;
+    background: #f8fafc;
+    margin-bottom: 1rem;
+  }
+
+  .resultado-card :global(.card-body) {
+    text-align: left;
+  }
+
+  .resultado-card :global(.card-body p) {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 0.35rem;
+    align-items: start;
+  }
+
+  .imagen-modal {
+    position: fixed;
+    z-index: 1100;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+  }
+
+  .imagen-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(15, 23, 42, 0.65);
+  }
+
+  .imagen-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(900px, 96vw);
+    max-height: 92vh;
+    border: 0;
+    border-radius: 14px;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  }
+
+  .imagen-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .imagen-modal-header h2 {
+    margin: 0;
+    color: #990c14;
+    font-size: 1.1rem;
+  }
+
+  .cerrar-imagen {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .imagen-ampliada {
+    display: block;
+    width: 100%;
+    max-height: calc(92vh - 5rem);
+    object-fit: contain;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  @media (max-width: 992px) {
+    .resultados-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .resultados-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .resultado-card :global(.card-body p) {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

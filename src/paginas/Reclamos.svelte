@@ -102,6 +102,8 @@
         switch (estado) {
             case 'aprobado':
                 return '#15803d';
+            case 'entregado':
+                return '#1d4ed8';
             case 'rechazado':
                 return '#b91c1c';
             default:
@@ -118,6 +120,8 @@
         switch (estado) {
             case 'aprobado':
                 return 'Tu reclamo fue aprobado. Contacta a la persona que publico el objeto para coordinar la entrega.';
+            case 'entregado':
+                return 'El objeto ya fue marcado como entregado. Gracias por usar el sistema.';
             case 'rechazado':
                 return 'Tu reclamo fue rechazado por administracion.';
             default:
@@ -388,7 +392,7 @@
                     Mis reclamos enviados
                   </h2>
                   <p class="text-secondary mb-4">
-                    Aqui puedes revisar si tus solicitudes estan pendientes, aprobadas o rechazadas.
+                    Aqui puedes revisar si tus solicitudes estan pendientes, aprobadas, rechazadas o entregadas.
                   </p>
                   {#if cargandoReclamos}
                     <div class="alert alert-light border mb-4">
