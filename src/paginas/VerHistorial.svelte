@@ -20,7 +20,7 @@
     entregado: 'Entregados'
   };
 
-  let usuarioId = 1;
+  $: usuarioId = $usuarioActual?.id;
   let objetos = [];
   let cargando = true;
   let mensaje = '';
@@ -37,6 +37,11 @@
     mensaje = '';
 
     try {
+      if (!usuarioId) {
+        objetos = [];
+        return;
+      }
+
       if (filtroEstado === 'todos') {
         objetos = await getHistorialUsuario(usuarioId);
       } else {

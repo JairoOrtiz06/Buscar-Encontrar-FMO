@@ -3,6 +3,7 @@
   import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
   import Navbar from '../componentes/Navbar.svelte';
   import Footer from '../componentes/Footer.svelte';
+  import { usuarioActual } from '../stores/authStore.js';
 
   const categorias = [
     { valor: 'carnés', label: 'Carnés' },
@@ -74,6 +75,11 @@
   }
 
   async function guardarObjeto() {
+    if (!$usuarioActual?.id) {
+      mensaje = 'Debes iniciar sesión para publicar un objeto';
+      return;
+    }
+
     if (!titulo.trim() || !categoria || !ubicacion.trim()) {
       mensaje = 'Completa todos los campos';
       return;
@@ -104,7 +110,7 @@
         categoria: categoria,
         ubicacion: ubicacion.trim(),
         foto: imagenBase64,
-        idUsuario: 1
+        idUsuario: $usuarioActual.id
       };
 
       await crearObjeto(objeto);

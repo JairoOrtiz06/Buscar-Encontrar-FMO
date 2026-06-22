@@ -36,7 +36,10 @@
     const coincideCategoria =
       categoria === "Todas" || objeto.categoria === categoria;
 
-    return coincideNombre && coincideCategoria;
+    const perteneceAlUsuarioActual =
+      objeto.idUsuario != null && String(objeto.idUsuario) === usuarioIdActual;
+
+    return coincideNombre && coincideCategoria && !perteneceAlUsuarioActual;
   });
 </script>
 

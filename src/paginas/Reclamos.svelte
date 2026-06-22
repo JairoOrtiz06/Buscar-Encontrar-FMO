@@ -230,30 +230,7 @@
                     {/if}
                   </div>
 
-                  <div class="mb-4">
-                    <label for="contacto" class="form-label fw-semibold text-dark">
-                      Medio de contacto
-                    </label>
-                    <input
-                      id="contacto"
-                      type="text"
-                      class="form-control form-control-lg"
-                      class:is-invalid={contactoError}
-                      bind:value={contacto}
-                      placeholder="Teléfono o correo electrónico"
-                      on:blur={() => {
-                        contactoError = contacto.trim()
-                          ? validarContacto(contacto.trim())
-                            ? ""
-                            : "Ingresa un correo o teléfono válido."
-                          : "Indica un medio de contacto.";
-                      }}
-                    />
-                    {#if contactoError}
-                      <div class="invalid-feedback d-block">{contactoError}</div>
-                    {/if}
-                  </div>
-
+        
                   {#if esPropietario}
                     <div class="alert alert-danger mt-3">
                       No puedes reclamar un objeto que tú mismo publicaste.
