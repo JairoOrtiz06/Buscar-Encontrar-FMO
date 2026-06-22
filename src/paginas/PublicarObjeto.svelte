@@ -2,16 +2,8 @@
 
 
   import { crearObjeto, verificarDuplicado } from '../crud/objetos.js';
-  import { usuarioActual, logout } from '../stores/authStore.js';
-  import { irA } from '../stores/navegacionStore.js';
-
-  const enlaces = [
-    { label: 'Inicio', key: 'inicio' },
-    { label: 'Publicar Objeto', key: 'publicar' },
-    { label: 'Buscar Objeto', key: 'buscar' },
-    { label: 'Mi Historial', key: 'historial' },
-    { label: 'Reclamos', key: 'reclamos' }
-  ];
+  import Navbar from '../componentes/Navbar.svelte';
+  import Footer from '../componentes/Footer.svelte';
 
   const categorias = [
     { valor: 'carnés', label: 'Carnés' },
@@ -151,34 +143,7 @@
 </script>
 
 <main class="publicar-layout">
-  <header class="inicio-header">
-    <div class="header-wrap">
-      <div class="header-left">
-        <p class="hello-text">Hola, {$usuarioActual?.nombre}</p>
-      </div>
-
-      <div class="header-center"></div>
-
-      <div class="header-right">
-        <nav class="nav-grid" aria-label="Navegación principal">
-          {#each enlaces as enlace}
-            <button class="nav-btn" class:active={enlace.key === 'publicar'} on:click={() => irA(enlace.key)}>
-              {enlace.label}
-            </button>
-          {/each}
-          <button
-            class="logout-btn"
-            on:click={() => {
-              logout();
-              irA('login');
-            }}
-          >
-            Salir
-          </button>
-        </nav>
-      </div>
-    </div>
-  </header>
+  <Navbar paginaActual="publicar" />
 
   <section class="publicar-main">
     <div class="container">
@@ -315,12 +280,7 @@
     </div>
   </section>
 
-  <footer class="inicio-footer">
-    <div class="footer-wrap">
-      <h4>Encuentra UES-FMO</h4>
-      <p>Plataforma universitaria para recuperar objetos perdidos y reportar hallazgos.</p>
-    </div>
-  </footer>
+  <Footer />
 </main>
 
 <style>

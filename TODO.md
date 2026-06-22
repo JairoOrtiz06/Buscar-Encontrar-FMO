@@ -1,8 +1,9 @@
-# TODO - Refactor PublicarObjeto.svelte
+# TODO - Refactor Header/Footer Reutilizables
 
-- [ ] Corregir estructura del script conservando lógica de inserción/duplicado
-- [ ] Integrar header/footer visual estilo Inicio
-- [ ] Reestructurar layout y formulario por secciones Bootstrap-like
-- [ ] Mejorar UX de validaciones, vista previa y mensajes
-- [ ] Aplicar estilos responsive mobile/tablet/desktop
-- [ ] Marcar tarea completada
+- [x] Actualizar `src/componentes/Navbar.svelte` con estructura solicitada y estado activo por `paginaActual`.
+- [x] Actualizar `src/componentes/Footer.svelte` con estructura solicitada.
+- [x] Refactor `src/paginas/Inicio.svelte` para usar `<Navbar />` y `<Footer />`.
+- [x] Refactor `src/paginas/PublicarObjeto.svelte` para usar `<Navbar />` y `<Footer />`.
+- [x] Refactor `src/paginas/BuscarObjeto.svelte` para usar `<Navbar />` y `<Footer />`.
+- [x] Refactor `src/paginas/Reclamos.svelte` para usar `<Footer />` reutilizable y eliminar footer duplicado.
+- [x] Marcar tareas completadas en este archivo.

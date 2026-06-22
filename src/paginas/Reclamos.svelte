@@ -300,12 +300,7 @@
     </div>
   </section>
 
-  <footer class="inicio-footer">
-    <div class="footer-wrap">
-      <h4>Encuentra UES-FMO</h4>
-      <p>Plataforma universitaria para recuperar objetos perdidos y reportar hallazgos.</p>
-    </div>
-  </footer>
+  <Footer />
 </main>
 
 
