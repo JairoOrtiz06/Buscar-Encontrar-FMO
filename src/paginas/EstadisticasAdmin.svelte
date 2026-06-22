@@ -1,117 +1,354 @@
-<script>
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import { dbPromise } from '../base_datos/database.js';
+
     let estadisticas = {
-        usuarios: 125,
-        objetosPublicados: 87,
-        reclamos: 34,
-        recuperados: 21,
-        archivados: 13
+        usuarios: 0,
+        objetosPublicados: 0,
+        reclamos: 0,
+        recuperados: 0,
+        archivados: 0,
+        pendientes:0,
+        aprobados:0,
+        rechazados:0
     };
+    
+    let todosLosObjetos: any[] = [];
+
+    onMount(async () => {
+        await cargarEstadisticas();
+    });
+        function obtenerClaseEstado(estado: string) {
+
+    switch (estado) {
+
+        case 'pendiente':
+            return 'bg-warning text-dark';
+
+        case 'reclamado':
+            return 'bg-primary';
+
+        case 'entregado':
+            return 'bg-success';
+
+        case 'archivado':
+            return 'bg-secondary';
+
+        default:
+            return 'bg-dark';
+    }
+}
+    let imagenAmpliada = "";
+    let mostrarImagen = false;
+
+    function abrirImagen(foto: string) {
+        imagenAmpliada = foto;
+        mostrarImagen = true;
+    }
+
+    function cerrarImagen() {
+        mostrarImagen = false;
+        imagenAmpliada = "";
+    }
+
+    async function cargarEstadisticas() {
+
+        const db = await dbPromise;
+        
+        const usuarios =
+            await db.getAll('usuarios');
+
+        const objetos =
+            await db.getAll('objetos');
+
+        const reclamos =
+            await db.getAll('reclamos');
+
+        const entregas =
+            await db.getAll('entregas');
+
+        todosLosObjetos = objetos;
+        estadisticas = {
+
+            usuarios: usuarios.length,
+
+            objetosPublicados: objetos.length,
+
+            reclamos: reclamos.length,
+
+            recuperados: entregas.length,
+
+            archivados: objetos.filter(
+                o => o.estado === 'archivado'
+            ).length,
+            pendientes:
+                objetos.filter(
+                    o => o.estado === 'pendiente'
+                ).length,
+
+            aprobados:
+            reclamos.filter(
+                r => r.estado === 'aprobado'
+            ).length,
+
+        rechazados:
+            reclamos.filter(
+                r => r.estado === 'rechazado'
+            ).length,
+                };
+    }
 
 </script>
-<h2>📊 Estadísticas del Sistema</h2>
 
-<div class="estadisticas">
+<h2 class="text-center text-danger mb-4">
+    Estadísticas del Sistema
+</h2>
+<div class="container">
+<div class="row g-4">
 
-    <div class="stat-card usuarios">
-        <h3>👥 Usuarios</h3>
-        <p>{estadisticas.usuarios}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-primary h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Usuarios</h5>
+                <h1 class="text-primary fw-bold">
+                    {estadisticas.usuarios}
+                </h1>
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card objetos">
-        <h3>📦 Objetos</h3>
-        <p>{estadisticas.objetosPublicados}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-warning h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Objetos</h5>
+                <h1 class="text-warning fw-bold">
+                    {estadisticas.objetosPublicados}
+                </h1>
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card reclamos">
-        <h3>📋 Reclamos</h3>
-        <p>{estadisticas.reclamos}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-info h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Reclamos</h5>
+                <h1 class="text-info fw-bold">
+                    {estadisticas.reclamos}
+                </h1>
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card recuperados">
-        <h3>✅ Recuperados</h3>
-        <p>{estadisticas.recuperados}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-secondary h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Archivados</h5>
+                <h1 class="text-secondary fw-bold">
+                    {estadisticas.archivados}
+                </h1>
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card archivados">
-        <h3>🗄️ Archivados</h3>
-        <p>{estadisticas.archivados}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-dark h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Pendientes</h5>
+                <h1 class="text-dark fw-bold">
+                    {estadisticas.pendientes}
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-primary h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Entregados</h5>
+                <h1 class="text-primary fw-bold">
+                    {estadisticas.recuperados}
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-success h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Aprobados</h5>
+                <h1 class="text-success fw-bold">
+                    {estadisticas.aprobados}
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow border-danger h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title"> Rechazados</h5>
+                <h1 class="text-danger fw-bold">
+                    {estadisticas.rechazados}
+                </h1>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="card shadow mt-5">
+
+    <div class="card-header bg-danger text-white">
+
+        <h4 class="mb-0">
+            Historial General de Objetos
+        </h4>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Foto</th>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Ubicación</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {#each todosLosObjetos as objeto}
+
+                        <tr>
+
+                            <td>
+                                {objeto.id}
+                            </td>
+                            <td>
+                                {#if objeto.foto}
+
+                                    <img
+                                    src={objeto.foto}
+                                    alt={objeto.titulo}
+                                    class="rounded shadow-sm"
+                                    style="
+                                        width:70px;
+                                        height:70px;
+                                        object-fit:cover;
+                                        cursor:pointer;
+                                    "
+                                    on:click={() => abrirImagen(objeto.foto)}
+                                />
+
+                                {/if}
+                            </td>
+
+                            <td>
+                                {objeto.titulo}
+                            </td>
+
+                            <td>
+                                {objeto.categoria}
+                            </td>
+
+                            <td>
+                                {objeto.ubicacion}
+                            </td>
+
+                            <td>
+                                {objeto.fechaPublicacion
+                                    ? new Date(objeto.fechaPublicacion)
+                                        .toLocaleDateString()
+                                    : "Sin fecha"}
+                            </td>
+
+                            <td>
+
+                                <span class={`badge ${obtenerClaseEstado(objeto.estado)}`}>
+
+                                    {objeto.estado}
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    {/each}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+{#if mostrarImagen}
+
+<div
+    class="modal d-block"
+    tabindex="-1"
+    style="background: rgba(0,0,0,.85);"
+    on:click={cerrarImagen}
+>
+
+    <div
+        class="modal-dialog modal-xl modal-dialog-centered"
+        on:click|stopPropagation
+    >
+
+        <div class="modal-content border-0 bg-transparent">
+
+            <div class="text-end mb-2">
+
+                <button
+                    class="btn btn-light"
+                    on:click={cerrarImagen}
+                >
+                    ✕
+                </button>
+
+            </div>
+
+            <img
+                src={imagenAmpliada}
+                alt="Imagen ampliada"
+                class="img-fluid rounded shadow"
+            />
+
+        </div>
+
     </div>
 
 </div>
 
-<style>
-  h2 {
-    text-align: center;
-    color: #b30000;
-    margin-bottom: 2rem;
-}
+{/if}
+</div>
 
-.estadisticas {
-    display: grid;
+<footer class="bg-danger text-white text-center p-3 rounded mt-5">
 
-    grid-template-columns:
-        repeat(auto-fit,
-        minmax(220px, 1fr));
+    <p class="mb-1">
+        © 2026 Encuentra UES-FMO
+    </p>
 
-    gap: 20px;
-}
+    <p class="mb-1">
+        Sistema de Gestión de Objetos Perdidos y Encontrados
+    </p>
 
-.stat-card {
-    background: white;
-    border-radius: 18px;
-    padding: 25px;
-    text-align: center;
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.08);
+    <p class="mb-0">
+        Universidad de El Salvador - Facultad Multidisciplinaria Oriental
+    </p>
 
-    transition: .3s;
-    border-top: 5px solid #b30000;
-}
-
-.stat-card:hover {
-    transform: translateY(-6px);
-    box-shadow:
-        0 15px 35px rgba(0,0,0,.15);
-}
-.stat-card h3 {
-    margin-bottom: 15px;
-    color: #475569;
-    font-size: 1rem;
-}
-.stat-card p {
-    font-size: 3rem;
-    font-weight: bold;
-    margin: 0;
-    color: #b30000;
-}
-.usuarios {
-    border-top-color: #2563eb;
-}
-
-.objetos {
-    border-top-color: #f59e0b;
-}
-
-.reclamos {
-    border-top-color: #7c3aed;
-}
-
-.recuperados {
-    border-top-color: #16a34a;
-}
-
-.archivados {
-    border-top-color: #64748b;
-}
-@media (max-width: 600px) {
-
-    .estadisticas {
-        grid-template-columns: 1fr;
-    }
-
-    .stat-card p {
-        font-size: 2.5rem;
-    }
-
-}
-</style>
+</footer>
