@@ -36,6 +36,7 @@
     let motivoError = "";
     let descripcionError = "";
     let contactoError = "";
+    $: formularioIncompleto = !motivo.trim() || !descripcion.trim() || !contacto.trim();
 
     function validarContacto(valor: string) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -61,6 +62,11 @@
             return;
         }
 
+        if (!$usuarioActual?.id) {
+            alert('Debes iniciar sesion para enviar un reclamo.');
+            return;
+        }
+
         if (esPropietario) {
             alert('No puedes reclamar un objeto que tú mismo publicaste.');
             return;
@@ -72,13 +78,24 @@
 
         try {
             const db = await dbPromise;
+            const reclamos = await db.getAll('reclamos');
+            const reclamoExistente = reclamos.find((reclamo) =>
+                reclamo.idObjeto === objeto?.id &&
+                String(reclamo.idSolicitante) === usuarioIdActual &&
+                ['pendiente', 'aprobado'].includes(reclamo.estado)
+            );
+
+            if (reclamoExistente) {
+                alert('Ya tienes un reclamo pendiente o aprobado para este objeto.');
+                return;
+            }
 
             await db.add('reclamos', {
                 idObjeto: objeto.id,
-                idSolicitante: usuarioIdActual,
-                motivo,
-                descripcion,
-                contacto,
+                idSolicitante: $usuarioActual.id,
+                motivo: motivo.trim(),
+                descripcion: descripcion.trim(),
+                contacto: contacto.trim(),
                 estado: 'pendiente',
                 fechaSolicitud: new Date().toISOString()
             });
@@ -230,7 +247,30 @@
                     {/if}
                   </div>
 
-        
+                  <div class="mb-4">
+                    <label for="contacto" class="form-label fw-semibold text-dark">
+                      Medio de contacto
+                    </label>
+                    <input
+                      id="contacto"
+                      type="text"
+                      class="form-control form-control-lg"
+                      class:is-invalid={contactoError}
+                      bind:value={contacto}
+                      placeholder="Telefono o correo electronico"
+                      on:blur={() => {
+                        contactoError = contacto.trim()
+                          ? validarContacto(contacto.trim())
+                            ? ""
+                            : "Ingresa un correo o telefono valido."
+                          : "Indica un medio de contacto.";
+                      }}
+                    />
+                    {#if contactoError}
+                      <div class="invalid-feedback d-block">{contactoError}</div>
+                    {/if}
+                  </div>
+
                   {#if esPropietario}
                     <div class="alert alert-danger mt-3">
                       No puedes reclamar un objeto que tú mismo publicaste.
@@ -242,7 +282,7 @@
                       class="btn text-white fw-bold py-3"
                       style="background-color: #990c14;"
                       on:click={enviarReclamo}
-                      disabled={!motivo || !descripcion || !contacto || esPropietario}
+                      disabled={formularioIncompleto || esPropietario || !$usuarioActual?.id}
                     >
                       Enviar solicitud de reclamo
                     </button>
