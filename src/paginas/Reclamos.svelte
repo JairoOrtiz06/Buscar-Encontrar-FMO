@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
     import { dbPromise } from '../base_datos/database.js';
     import { usuarioActual } from '../stores/authStore.js';
     import Navbar from '../componentes/Navbar.svelte';
@@ -36,7 +37,73 @@
     let motivoError = "";
     let descripcionError = "";
     let contactoError = "";
+    let misReclamos: any[] = [];
+    let cargandoReclamos = true;
     $: formularioIncompleto = !motivo.trim() || !descripcion.trim() || !contacto.trim();
+
+    onMount(async () => {
+        await cargarMisReclamos();
+    });
+
+    async function cargarMisReclamos() {
+        cargandoReclamos = true;
+
+        try {
+            if (!$usuarioActual?.id) {
+                misReclamos = [];
+                return;
+            }
+
+            const db = await dbPromise;
+            const reclamos = await db.getAll('reclamos');
+            const reclamosUsuario = reclamos.filter((reclamo) =>
+                String(reclamo.idSolicitante) === usuarioIdActual
+            );
+
+            misReclamos = await Promise.all(
+                reclamosUsuario.map(async (reclamo) => ({
+                    ...reclamo,
+                    objeto: await db.get('objetos', reclamo.idObjeto)
+                }))
+            );
+
+            misReclamos = misReclamos.sort(
+                (a, b) => new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime()
+            );
+        } catch (error) {
+            console.error('Error cargando reclamos del usuario:', error);
+            misReclamos = [];
+        } finally {
+            cargandoReclamos = false;
+        }
+    }
+
+    function formatearFecha(fecha: string) {
+        if (!fecha) return 'Sin fecha';
+        return new Date(fecha).toLocaleDateString();
+    }
+
+    function getEstadoColor(estado: string) {
+        switch (estado) {
+            case 'aprobado':
+                return '#15803d';
+            case 'rechazado':
+                return '#b91c1c';
+            default:
+                return '#a16207';
+        }
+    }
+
+    function getMensajeEstado(estado: string) {
+        switch (estado) {
+            case 'aprobado':
+                return 'Tu reclamo fue aprobado. Acercate a administracion para continuar el proceso.';
+            case 'rechazado':
+                return 'Tu reclamo fue rechazado por administracion.';
+            default:
+                return 'Tu reclamo esta pendiente de revision.';
+        }
+    }
 
     function validarContacto(valor: string) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -128,7 +195,7 @@
           </p>
 
           <h1 class="fw-bold mb-3" style="color: #990c14;">
-            Solicitar Reclamo
+            {objeto && objeto.id != null ? 'Solicitar Reclamo' : 'Mis reclamos'}
           </h1>
 
           <p class="text-secondary mb-0">
@@ -296,13 +363,82 @@
               </div>
             {:else}
               <div class="col-12">
-                <div class="p-4 p-lg-5 text-center">
+                <div class="p-4 p-lg-5">
                   <h2 class="h4 fw-bold mb-3" style="color: #990c14;">
-                    Selecciona un objeto antes de reclamar
+                    Mis reclamos enviados
                   </h2>
                   <p class="text-secondary mb-4">
-                    Primero ve a Buscar Objeto y elige el objeto que quieres reclamar. Luego usa el botón "Reclamar objeto".
+                    Aqui puedes revisar si tus solicitudes estan pendientes, aprobadas o rechazadas.
                   </p>
+                  {#if cargandoReclamos}
+                    <div class="alert alert-light border mb-4">
+                      Cargando tus reclamos...
+                    </div>
+                  {:else if misReclamos.length === 0}
+                    <div class="alert alert-light border mb-4">
+                      Aun no has enviado reclamos.
+                    </div>
+                  {:else}
+                    <div class="d-flex flex-column gap-3 mb-4 text-start">
+                      {#each misReclamos as reclamo}
+                        <article class="border rounded p-3 p-md-4 bg-white shadow-sm">
+                          <div class="row g-3 align-items-center">
+                            <div class="col-12 col-md-3">
+                              {#if reclamo.objeto?.foto}
+                                <img
+                                  src={reclamo.objeto.foto}
+                                  alt={reclamo.objeto.titulo}
+                                  class="img-fluid rounded w-100 object-fit-cover"
+                                  style="max-height: 150px;"
+                                />
+                              {:else}
+                                <div
+                                  class="border rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                  style="height: 130px;"
+                                >
+                                  Sin imagen
+                                </div>
+                              {/if}
+                            </div>
+
+                            <div class="col-12 col-md-9">
+                              <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-2">
+                                <div>
+                                  <p class="text-uppercase text-secondary small fw-bold mb-1">
+                                    {reclamo.objeto?.categoria || 'Sin categoria'}
+                                  </p>
+                                  <h3 class="h5 fw-bold mb-0" style="color: #990c14;">
+                                    {reclamo.objeto?.titulo || 'Objeto no disponible'}
+                                  </h3>
+                                </div>
+
+                                <span
+                                  class="badge text-white align-self-md-start px-3 py-2"
+                                  style={`background-color: ${getEstadoColor(reclamo.estado)};`}
+                                >
+                                  {reclamo.estado}
+                                </span>
+                              </div>
+
+                              <p class="text-secondary mb-2">
+                                <strong class="text-dark">Fecha:</strong>
+                                {formatearFecha(reclamo.fechaSolicitud)}
+                              </p>
+
+                              <p class="text-secondary mb-2">
+                                <strong class="text-dark">Motivo:</strong>
+                                {reclamo.motivo}
+                              </p>
+
+                              <div class="alert alert-light border mb-0">
+                                {getMensajeEstado(reclamo.estado)}
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      {/each}
+                    </div>
+                  {/if}
                   <button
                     class="btn btn-outline-danger px-4 py-3"
                     on:click={volver}

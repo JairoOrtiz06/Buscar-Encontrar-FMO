@@ -24,13 +24,22 @@
 
     async function aprobarReclamo(id: number) {
         const db = await dbPromise;
-        const tx = db.transaction('reclamos', 'readwrite');
-        const store = tx.objectStore('reclamos');
-        const reclamo = await store.get(id);
+        const tx = db.transaction(['reclamos', 'objetos'], 'readwrite');
+        const reclamosStore = tx.objectStore('reclamos');
+        const objetosStore = tx.objectStore('objetos');
+        const reclamo = await reclamosStore.get(id);
         if (!reclamo) return;
 
         reclamo.estado = "aprobado";
-        await store.put(reclamo);
+        await reclamosStore.put(reclamo);
+
+        const objeto = await objetosStore.get(reclamo.idObjeto);
+        if (objeto) {
+            objeto.estado = "reclamado";
+            await objetosStore.put(objeto);
+        }
+
+        await tx.done;
         await cargarReclamos();
         mostrarNotificacion("Reclamo aprobado");
     }
