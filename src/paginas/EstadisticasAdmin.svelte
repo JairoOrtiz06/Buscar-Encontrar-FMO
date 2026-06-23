@@ -100,10 +100,10 @@
 
 </script>
 
-<h2 class="text-center text-danger mb-4">
+<h2 class="text-center text-ues-red fw-bold mb-4">
     Estadísticas del Sistema
 </h2>
-<div class="container">
+<div class="container flex-grow-1 pb-4">
 <div class="row g-4">
 
     <div class="col-md-6 col-lg-3">
@@ -197,7 +197,7 @@
 </div>
 <div class="card shadow mt-5">
 
-    <div class="card-header bg-danger text-white">
+    <div class="card-header bg-ues-red text-white">
 
         <h4 class="mb-0">
             Historial General de Objetos
@@ -337,7 +337,7 @@
 {/if}
 </div>
 
-<footer class="bg-danger text-white text-center p-3 rounded mt-5">
+<footer class="bg-ues-red text-white text-center p-3 mt-auto">
 
     <p class="mb-1">
         © 2026 Encuentra UES-FMO
@@ -352,3 +352,13 @@
     </p>
 
 </footer>
+
+<style>
+    .bg-ues-red {
+        background-color: #990c14;
+    }
+
+    .text-ues-red {
+        color: #990c14;
+    }
+</style>

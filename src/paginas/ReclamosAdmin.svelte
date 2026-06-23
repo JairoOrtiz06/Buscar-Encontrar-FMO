@@ -140,9 +140,9 @@
         {notificacion}
     </div>
 {/if}
-<div class="container">
+<div class="container flex-grow-1 pb-4">
 
-<h2 class="text-center text-danger my-4">Reclamos Pendientes</h2>
+<h2 class="text-center text-ues-red fw-bold my-4">Reclamos Pendientes</h2>
 
 <div class="row g-4">
     {#if reclamosPendientes.length > 0}
@@ -191,7 +191,7 @@
 
             <div class="card-body">
 
-                <h4 class="card-title text-danger fw-bold">
+                <h4 class="card-title text-ues-red fw-bold">
                     {objeto?.titulo || 'Objeto'}
                 </h4>
 
@@ -344,7 +344,7 @@
     
 </div>
 
-<h2 class="text-center text-danger my-4">Reclamos Rechazados</h2>
+<h2 class="text-center text-ues-red fw-bold my-4">Reclamos Rechazados</h2>
 <div class="row g-4">
 
     {#each reclamosRechazados as reclamo}
@@ -455,7 +455,7 @@
 </div>
 
 </div>
-<footer class=" bg-danger text-white text-center p-3 rounded mt-4">
+<footer class="bg-ues-red text-white text-center p-3 mt-auto">
 
     <p class="mb-1">
         © 2026 Encuentra UES-FMO
@@ -470,3 +470,13 @@
     </p>
 
 </footer>
+
+<style>
+    .bg-ues-red {
+        background-color: #990c14;
+    }
+
+    .text-ues-red {
+        color: #990c14;
+    }
+</style>

@@ -20,8 +20,13 @@
     let mostrarEditar = false;
     let usuarioEditando: any = null;
     let busqueda = "";
+    let usuariosFiltrados: any[] = [];
     let imagenSeleccionada = "";
     let notificacion = "";
+
+    $: usuariosFiltrados = usuariosAprobados.filter(
+        usuario => usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    );
 
     onMount(async () => {
         await cargarUsuarios();
@@ -345,9 +350,9 @@
 {notificacion} </div>
 {/if}
 
-<div class="container-fluid">
+<div class="container-fluid flex-grow-1 px-3 px-lg-4 pb-4">
 
-<h2 class="text-center text-danger mb-4">
+<h2 class="text-center text-ues-red fw-bold mb-4">
     Aprobar Registros
 </h2>
 
@@ -357,11 +362,11 @@
 
         <div class="col-12 col-md-6 col-xl-4">
 
-            <div class="card shadow h-100">
+            <div class="card border-0 shadow-sm h-100">
 
                 <div class="card-body">
 
-                    <h5 class="card-title text-danger">
+                    <h5 class="card-title text-ues-red fw-bold">
                         {usuario.nombre}
                     </h5>
 
@@ -390,13 +395,13 @@
                     <div class="d-grid gap-2 d-md-flex">
 
                         <button
-                            class="btn btn-success btn-sm flex-fill"
+                            class="btn btn-success btn-sm flex-fill fw-semibold shadow-sm"
                             on:click={() => aprobarUsuario(usuario.id)}>
                             Aprobar
                         </button>
 
                         <button
-                            class="btn btn-danger btn-sm flex-fill"
+                            class="btn btn-outline-danger btn-sm flex-fill fw-semibold"
                             on:click={() => rechazarUsuario(usuario.id)}>
                             Rechazar
                         </button>
@@ -409,6 +414,17 @@
 
         </div>
 
+    {:else}
+        <div class="col-12">
+            <div class="alert alert-light border text-center shadow-sm py-4 mb-0">
+                <h5 class="text-ues-red fw-bold mb-2">
+                    Sin registros pendientes por aprobar
+                </h5>
+                <p class="text-muted mb-0">
+                    Cuando un usuario nuevo se registre, aparecera aqui para aprobarlo o rechazarlo.
+                </p>
+            </div>
+        </div>
     {/each}
 
 </div>
@@ -679,7 +695,7 @@
 
 <hr class="my-5">
 
-<h2 class="text-center text-danger mb-4">
+<h2 class="text-center text-ues-red fw-bold mb-4">
     Usuarios Registrados
 </h2>
 
@@ -691,17 +707,17 @@
             type="text"
             bind:value={busqueda}
             placeholder="🔍 Buscar usuario..."
-            class="form-control">
+            class="form-control form-control-lg shadow-sm">
 
     </div>
 
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive bg-white rounded-3 shadow-sm">
 
-    <table class="table table-striped table-hover table-bordered shadow">
+    <table class="table table-hover align-middle mb-0">
 
-        <thead class="table-danger">
+        <thead class="table-light">
 
             <tr>
                 <th>Nombre</th>
@@ -715,9 +731,7 @@
 
         <tbody>
 
-            {#each usuariosAprobados.filter(
-                usuario => usuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
-            ) as usuario}
+            {#each usuariosFiltrados as usuario}
 
                 <tr>
 
@@ -751,7 +765,7 @@
                         <div class="d-flex flex-column flex-md-row gap-2">
 
                             <button
-                                class="btn btn-warning btn-sm"
+                                class="btn btn-outline-warning btn-sm fw-semibold px-3"
                                 on:click={() => desactivarUsuario(usuario.id)}>
 
                                 {usuario.estado === "aprobado"
@@ -761,7 +775,7 @@
                             </button>
 
                             <button
-                                class="btn btn-primary btn-sm"
+                                class="btn btn-primary btn-sm fw-semibold px-3 shadow-sm"
                                 on:click={() => editarUsuario(usuario)}>
 
                                 Editar
@@ -774,6 +788,17 @@
 
                 </tr>
 
+            {:else}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <h5 class="text-ues-red fw-bold mb-2">
+                            No se encontraron resultados
+                        </h5>
+                        <p class="text-muted mb-0">
+                            No hay usuarios registrados que coincidan con "{busqueda}".
+                        </p>
+                    </td>
+                </tr>
             {/each}
 
         </tbody>
@@ -784,7 +809,7 @@
 
 </div>
 
-<footer class=" bg-danger text-white text-center p-3 rounded mt-4">
+<footer class="bg-ues-red text-white text-center p-3 mt-auto">
 
     <p class="mb-1">
         © 2026 Encuentra UES-FMO
@@ -799,3 +824,13 @@
     </p>
 
 </footer>
+
+<style>
+    .bg-ues-red {
+        background-color: #990c14;
+    }
+
+    .text-ues-red {
+        color: #990c14;
+    }
+</style>

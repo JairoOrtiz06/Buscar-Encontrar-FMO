@@ -123,14 +123,14 @@
         return fecha.toLocaleDateString();
     }
 </script>
-<div class="container">
+<div class="container flex-grow-1 pb-4">
 {#if notificacion}
     <div class="alert alert-success text-center" role="alert">
         {notificacion}
     </div>
 {/if}
 
-<h2 class="mb-4">Objetos Publicados</h2>
+<h2 class="text-ues-red fw-bold mb-4">Objetos Publicados</h2>
 
 <div class="row g-4">
     {#if objetosPendientes.length > 0}
@@ -141,7 +141,7 @@
                         <img src={objeto.foto} alt={objeto.titulo} class="card-img-top">
                     {/if}
                     <div class="card-body">
-                        <h5 class="card-title text-danger">{objeto.titulo}</h5>
+                        <h5 class="card-title text-ues-red fw-bold">{objeto.titulo}</h5>
                         <p class="card-text"><strong>Categoría:</strong> {objeto.categoria}</p>
                         <p class="card-text"><strong>Ubicación:</strong> {objeto.ubicacion}</p>
                         <p class="card-text"><strong>Fecha:</strong> {formatearFecha(objeto.fechaPublicacion)}</p>
@@ -243,7 +243,7 @@
     </div>
 {/if}
 </div>
-<footer class=" bg-danger text-white text-center p-3 rounded mt-4">
+<footer class="bg-ues-red text-white text-center p-3 mt-auto">
 
     <p class="mb-1">
         © 2026 Encuentra UES-FMO
@@ -259,3 +259,12 @@
 
 </footer>
 
+<style>
+    .bg-ues-red {
+        background-color: #990c14;
+    }
+
+    .text-ues-red {
+        color: #990c14;
+    }
+</style>

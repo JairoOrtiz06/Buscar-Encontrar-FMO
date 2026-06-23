@@ -44,8 +44,14 @@ export async function crearAdminPorDefecto() {
 }
 
 
-export const dbPromise = openDB('encuentraUES', 1, {
-    upgrade(db) {
+function crearIndiceSiNoExiste(store, nombre, keyPath, opciones = { unique: false }) {
+    if (!store.indexNames.contains(nombre)) {
+        store.createIndex(nombre, keyPath, opciones);
+    }
+}
+
+export const dbPromise = openDB('encuentraUES', 2, {
+    upgrade(db, oldVersion, newVersion, transaction) {
 
         //USUARIOS
         if (!db.objectStoreNames.contains('usuarios')) {
@@ -53,10 +59,18 @@ export const dbPromise = openDB('encuentraUES', 1, {
                 keyPath: 'id',
                 autoIncrement: true
             });
-            store.createIndex('correo', 'correo', { unique: true });
-            store.createIndex('carnet', 'carnet', { unique: false });
-            store.createIndex('tipo', 'tipo', { unique: false });
-            store.createIndex('validado', 'validado', { unique: false });
+            crearIndiceSiNoExiste(store, 'correo', 'correo', { unique: true });
+            crearIndiceSiNoExiste(store, 'dui', 'dui', { unique: false });
+            crearIndiceSiNoExiste(store, 'carnet', 'carnet', { unique: false });
+            crearIndiceSiNoExiste(store, 'tipo', 'tipo', { unique: false });
+            crearIndiceSiNoExiste(store, 'validado', 'validado', { unique: false });
+        } else {
+            const store = transaction.objectStore('usuarios');
+            crearIndiceSiNoExiste(store, 'correo', 'correo', { unique: true });
+            crearIndiceSiNoExiste(store, 'dui', 'dui', { unique: false });
+            crearIndiceSiNoExiste(store, 'carnet', 'carnet', { unique: false });
+            crearIndiceSiNoExiste(store, 'tipo', 'tipo', { unique: false });
+            crearIndiceSiNoExiste(store, 'validado', 'validado', { unique: false });
         }
 
         if (!db.objectStoreNames.contains('sesiones')) {
