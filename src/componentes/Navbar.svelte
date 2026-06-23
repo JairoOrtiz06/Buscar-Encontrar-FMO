@@ -12,7 +12,8 @@
     { label: 'Publicar Objeto', key: 'publicar' },
     { label: 'Buscar Objeto', key: 'buscar' },
     { label: 'Mi Historial', key: 'historial' },
-    { label: 'Reclamos', key: 'reclamos' }
+    { label: 'Reclamos', key: 'reclamos' },
+    { label: 'Perfil', key: 'perfil' }
   ];
 
 
@@ -42,6 +43,10 @@ onMount(async () => {
             perfil.base64;
     }
 });
+
+$: if ($usuarioActual?.fotoPerfil) {
+    fotoPerfil = $usuarioActual.fotoPerfil;
+}
 
 </script>
 

@@ -82,6 +82,25 @@ export function establecerUsuarioAutenticado(usuario, token) {
     limpiarError();
 }
 
+export function actualizarUsuarioActual(datosActualizados) {
+    let usuarioActualizado = null;
+
+    usuarioActual.update(usuario => {
+        if (!usuario) return usuario;
+
+        usuarioActualizado = {
+            ...usuario,
+            ...datosActualizados
+        };
+
+        return usuarioActualizado;
+    });
+
+    if (usuarioActualizado) {
+        localStorage.setItem('usuarioActual', JSON.stringify(usuarioActualizado));
+    }
+}
+
 // ============================================================
 // 4. FUNCIONES: CERRAR SESIÓN (DELETE)
 // ============================================================
@@ -202,6 +221,7 @@ export default {
     
     // Funciones para manipular el estado
     establecerUsuarioAutenticado,
+    actualizarUsuarioActual,
     logout,
     establecerError,
     limpiarError,
