@@ -67,6 +67,51 @@
         return;
       }
 
+      if (nuevoEstado === 'entregado') {
+        const db = await dbPromise;
+        const tx = db.transaction(['objetos', 'reclamos', 'entregas'], 'readwrite');
+        const objetosStore = tx.objectStore('objetos');
+        const reclamosStore = tx.objectStore('reclamos');
+        const entregasStore = tx.objectStore('entregas');
+
+        const objetoGuardado = await objetosStore.get(id);
+        if (!objetoGuardado) {
+          throw new Error('Objeto no encontrado');
+        }
+
+        objetoGuardado.estado = 'entregado';
+        await objetosStore.put(objetoGuardado);
+
+        const reclamos = await reclamosStore.getAll();
+        const reclamoAprobado = reclamos.find((reclamo) =>
+          reclamo.idObjeto === id && reclamo.estado === 'aprobado'
+        );
+
+        if (reclamoAprobado) {
+          reclamoAprobado.estado = 'entregado';
+          await reclamosStore.put(reclamoAprobado);
+
+          const entregas = await entregasStore.getAll();
+          const entregaExiste = entregas.some((entrega) =>
+            entrega.idReclamo === reclamoAprobado.id
+          );
+
+          if (!entregaExiste) {
+            await entregasStore.add({
+              idObjeto: id,
+              idReclamo: reclamoAprobado.id,
+              fechaEntrega: new Date().toISOString()
+            });
+          }
+        }
+
+        await tx.done;
+        mensaje = 'Estado actualizado correctamente';
+        cerrarModal();
+        await cargarHistorial();
+        return;
+      }
+
       await actualizarEstado(id, nuevoEstado);
       mensaje = 'Estado actualizado correctamente';
       cerrarModal();
