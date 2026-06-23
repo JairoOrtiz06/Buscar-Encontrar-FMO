@@ -1,6 +1,9 @@
 <script>
   import { usuarioActual, logout } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
+  import { onMount } from 'svelte';
+  import { dbPromise } from '../base_datos/database.js';
+
 
   export let paginaActual = 'inicio';
 
@@ -11,12 +14,53 @@
     { label: 'Mi Historial', key: 'historial' },
     { label: 'Reclamos', key: 'reclamos' }
   ];
+
+
+let fotoPerfil = '';
+
+onMount(async () => {
+
+    if (!$usuarioActual) return;
+
+    const db = await dbPromise;
+
+    const fotos =
+        await db.getAllFromIndex(
+            'fotos',
+            'idUsuario',
+            $usuarioActual.id
+        );
+
+    const perfil =
+        fotos.find(
+            foto => foto.tipo === 'perfil'
+        );
+
+    if (perfil) {
+
+        fotoPerfil =
+            perfil.base64;
+    }
+});
+
 </script>
 
 <header class="inicio-header">
   <div class="header-wrap">
     <div class="header-left">
-      <p class="hello-text">Hola, {$usuarioActual?.nombre}</p>
+
+        {#if fotoPerfil}
+            <img
+                src={fotoPerfil}
+                alt="Perfil"
+                class="foto-perfil"
+            >
+        {/if}
+
+        <p class="hello-text">
+            Hola, {$usuarioActual?.nombre}
+        </p>
+
     </div>
 
     <div class="header-center"></div>
@@ -156,6 +200,20 @@
   .logout-btn:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.95);
     outline-offset: 2px;
+  }
+  .header-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+  }
+
+  .foto-perfil{
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      object-fit:cover;
+      border:3px solid white;
+      box-shadow:0 2px 8px rgba(0,0,0,.25);
   }
 
   @media (max-width: 1200px) and (min-width: 769px) {

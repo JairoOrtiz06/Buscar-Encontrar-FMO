@@ -9,6 +9,7 @@
     let reclamosEntregados: any[] = [];
     let usuarios: any[] = [];
     let objetos: any[] = [];
+    let imagenSeleccionada = "";
 
     onMount(async () => {
         await cargarReclamos();
@@ -139,6 +140,7 @@
         {notificacion}
     </div>
 {/if}
+<div class="container">
 
 <h2 class="text-center text-danger my-4">Reclamos Pendientes</h2>
 
@@ -154,12 +156,38 @@
 
             {#if objeto?.foto}
                 <img
-                    src={objeto.foto}
-                    alt={objeto.titulo}
-                    class="card-img-top"
-                    style="height: 260px; object-fit: cover;"
-                />
+                src={objeto.foto}
+                alt={objeto.titulo}
+                class="card-img-top"
+                style="height: 260px; object-fit: cover; cursor: pointer;"
+                on:click={() => imagenSeleccionada = objeto.foto}
+            />
             {/if}
+            {#if imagenSeleccionada}
+
+            <div
+                class="modal d-block"
+                tabindex="-1"
+                style="background: rgba(0,0,0,.8);"
+                on:click={() => imagenSeleccionada = ""}>
+
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+
+                    <div
+                        class="modal-content border-0 bg-transparent shadow-none">
+
+                        <img
+                            src={imagenSeleccionada}
+                            alt="Imagen ampliada"
+                            class="img-fluid rounded">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+{/if}
 
             <div class="card-body">
 
@@ -179,8 +207,13 @@
                 </p>
 
                 <p class="mb-1">
-                    <strong>Carnet:</strong>
-                    {usuario?.carnet || 'No disponible'}
+                    <strong>
+                        {usuario?.tipo === 'estudiante'
+                            ? 'Carnet'
+                            : 'Código Institucional'}:
+                    </strong>
+
+                    {usuario?.carnet || usuario?.codigoInstitucional || 'No disponible'}
                 </p>
 
                 <p class="mb-1">
@@ -298,7 +331,7 @@
                                 class="btn btn-primary w-100"
                                 on:click={() => entregarReclamo(reclamo.id)}
                             >
-                                📦 Marcar como entregado
+                                Marcar como entregado
                             </button>
 
                         </div>
@@ -308,22 +341,69 @@
             </div>
         </div>
     {/each}
+    
 </div>
 
 <h2 class="text-center text-danger my-4">Reclamos Rechazados</h2>
 <div class="row g-4">
+
     {#each reclamosRechazados as reclamo}
+
+        {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
+        {@const objeto = obtenerObjeto(reclamo.idObjeto)}
+
         <div class="col-md-4">
+
             <div class="card border-danger shadow h-100">
+
+                {#if objeto?.foto}
+                            <img
+                                src={objeto.foto}
+                                alt={objeto.titulo}
+                                class="card-img-top"
+                                style="height:220px; object-fit:cover;"
+                            />
+                {/if}
                 <div class="card-body">
-                    <h5 class="card-title">Reclamo #{reclamo.id}</h5>
-                    <p>ID Objeto: {reclamo.idObjeto}</p>
-                    <p>ID Solicitante: {reclamo.idSolicitante}</p>
-                    <span class="badge bg-danger">✕ Rechazado</span>
+
+                    <h5 class="card-title">
+                        {objeto?.titulo || 'Objeto'}
+                    </h5>
+
+                    <p>
+                        <strong>Solicitante:</strong>
+                        {usuario?.nombre || 'No disponible'}
+                    </p>
+
+                    <p>
+                        <strong>Correo:</strong>
+                        {usuario?.correo || 'No disponible'}
+                    </p>
+
+                    <p>
+                        <strong>
+                            {usuario?.tipo === 'estudiante'
+                                ? 'Carnet'
+                                : 'Código Institucional'}:
+                        </strong>
+
+                        {usuario?.carnet ||
+                         usuario?.codigoInstitucional ||
+                         'No disponible'}
+                    </p>
+
+                    <span class="badge bg-danger">
+                        ✕ Rechazado
+                    </span>
+
                 </div>
+
             </div>
+
         </div>
+
     {/each}
+
 </div>
 
 <h2 class="text-center text-secondary my-4">
@@ -374,6 +454,7 @@
 
 </div>
 
+</div>
 <footer class=" bg-danger text-white text-center p-3 rounded mt-4">
 
     <p class="mb-1">
