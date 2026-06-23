@@ -15,6 +15,7 @@
   import BuscarObjeto from './paginas/BuscarObjeto.svelte';
   import VerHistorial from './paginas/VerHistorial.svelte';
   import Reclamos from './paginas/Reclamos.svelte';
+  import PerfilUsuario from './paginas/PerfilUsuario.svelte';
   
   // Stores de autenticación
   import { 
@@ -74,6 +75,10 @@
   {:else if $paginaActual === 'historial'}
 
     <VerHistorial />
+
+  {:else if $paginaActual === 'perfil'}
+
+    <PerfilUsuario />
 
   {:else if $usuarioActual?.tipo === 'admin'}
 
