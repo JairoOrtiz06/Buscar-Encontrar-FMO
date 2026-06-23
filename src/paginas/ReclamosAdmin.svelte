@@ -16,25 +16,25 @@
     });
 
     async function cargarReclamos() {
-    const db = await dbPromise;
+        const db = await dbPromise;
 
-    const reclamosTx = db.transaction('reclamos', 'readonly');
-    const reclamosStore = reclamosTx.objectStore('reclamos');
-    const todos = await reclamosStore.getAll();
+        const reclamosTx = db.transaction('reclamos', 'readonly');
+        const reclamosStore = reclamosTx.objectStore('reclamos');
+        const todos = await reclamosStore.getAll();
 
-    const usuariosTx = db.transaction('usuarios', 'readonly');
-    const usuariosStore = usuariosTx.objectStore('usuarios');
-    usuarios = await usuariosStore.getAll();
+        const usuariosTx = db.transaction('usuarios', 'readonly');
+        const usuariosStore = usuariosTx.objectStore('usuarios');
+        usuarios = await usuariosStore.getAll();
 
-    const objetosTx = db.transaction('objetos', 'readonly');
-    const objetosStore = objetosTx.objectStore('objetos');
-    objetos = await objetosStore.getAll();
+        const objetosTx = db.transaction('objetos', 'readonly');
+        const objetosStore = objetosTx.objectStore('objetos');
+        objetos = await objetosStore.getAll();
 
-    reclamosPendientes = todos.filter(r => r.estado === "pendiente");
-    reclamosAprobados = todos.filter(r => r.estado === "aprobado");
-    reclamosRechazados = todos.filter(r => r.estado === "rechazado");
-    reclamosEntregados = todos.filter(r => r.estado === "entregado");
-}
+        reclamosPendientes = todos.filter(r => r.estado === "pendiente");
+        reclamosAprobados = todos.filter(r => r.estado === "aprobado");
+        reclamosRechazados = todos.filter(r => r.estado === "rechazado");
+        reclamosEntregados = todos.filter(r => r.estado === "entregado");
+    }
 
     async function aprobarReclamo(id: number) {
         const db = await dbPromise;
@@ -72,11 +72,10 @@
     }
 
     async function entregarReclamo(id: number) {
-
         const db = await dbPromise;
 
         const tx = db.transaction(
-            ['reclamos', 'objetos','entregas'],
+            ['reclamos', 'objetos', 'entregas'],
             'readwrite'
         );
 
@@ -85,22 +84,17 @@
         const entregasStore = tx.objectStore('entregas');
 
         const reclamo = await reclamosStore.get(id);
-
         if (!reclamo) return;
 
         reclamo.estado = "entregado";
-
         await reclamosStore.put(reclamo);
 
         const objeto = await objetosStore.get(reclamo.idObjeto);
-
         if (objeto) {
-
             objeto.estado = "entregado";
-
             await objetosStore.put(objeto);
         }
-        
+
         await entregasStore.add({
             idObjeto: reclamo.idObjeto,
             idReclamo: reclamo.id,
@@ -108,11 +102,10 @@
         });
 
         await tx.done;
-
         await cargarReclamos();
-
         mostrarNotificacion("Objeto entregado correctamente");
     }
+
     function mostrarNotificacion(mensaje: string) {
         notificacion = mensaje;
         setTimeout(() => { notificacion = ""; }, 3000);
@@ -122,6 +115,7 @@
         if (!fecha) return "Sin fecha";
         return new Date(fecha).toLocaleDateString();
     }
+
     function obtenerUsuario(id: string | number) {
         return usuarios.find(
             u => String(u.id) === String(id)
@@ -136,339 +130,274 @@
 </script>
 
 {#if notificacion}
-    <div class="alert alert-info text-center shadow position-fixed top-0 end-0 m-3">
+    <div class="alert alert-info text-center shadow position-fixed top-0 end-0 m-3" style="z-index: 1050;">
         {notificacion}
     </div>
 {/if}
-<div class="container flex-grow-1 pb-4">
 
-<h2 class="text-center text-ues-red fw-bold my-4">Reclamos Pendientes</h2>
-
-<div class="row g-4">
-    {#if reclamosPendientes.length > 0}
-        {#each reclamosPendientes as reclamo}
-
-    {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
-    {@const objeto = obtenerObjeto(reclamo.idObjeto)}
-
-    <div class="col-md-8 col-lg-5 col-xl-4">
-        <div class="card shadow border-0 h-100">
-
-            {#if objeto?.foto}
+{#if imagenSeleccionada}
+    <div
+        class="modal d-block"
+        tabindex="-1"
+        role="button"
+        aria-label="Cerrar imagen ampliada"
+        style="background: rgba(0,0,0,.8);"
+        on:keydown={(event) => {
+            if (event.key === 'Escape' || event.key === 'Enter') {
+                imagenSeleccionada = "";
+            }
+        }}
+        on:click={() => imagenSeleccionada = ""}>
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 bg-transparent shadow-none">
                 <img
-                src={objeto.foto}
-                alt={objeto.titulo}
-                class="card-img-top"
-                style="height: 260px; object-fit: cover; cursor: pointer;"
-                on:click={() => imagenSeleccionada = objeto.foto}
-            />
-            {/if}
-            {#if imagenSeleccionada}
-
-            <div
-                class="modal d-block"
-                tabindex="-1"
-                style="background: rgba(0,0,0,.8);"
-                on:click={() => imagenSeleccionada = ""}>
-
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-
-                    <div
-                        class="modal-content border-0 bg-transparent shadow-none">
-
-                        <img
-                            src={imagenSeleccionada}
-                            alt="Imagen ampliada"
-                            class="img-fluid rounded">
-
-                    </div>
-
-                </div>
-
-            </div>
-
-{/if}
-
-            <div class="card-body">
-
-                <h4 class="card-title text-ues-red fw-bold">
-                    {objeto?.titulo || 'Objeto'}
-                </h4>
-
-                <hr>
-
-                <h5 class="text-primary">
-                    Solicitante
-                </h5>
-
-                <p class="mb-1">
-                    <strong>Nombre:</strong>
-                    {usuario?.nombre || 'No disponible'}
-                </p>
-
-                <p class="mb-1">
-                    <strong>
-                        {usuario?.tipo === 'estudiante'
-                            ? 'Carnet'
-                            : 'Código Institucional'}:
-                    </strong>
-
-                    {usuario?.carnet || usuario?.codigoInstitucional || 'No disponible'}
-                </p>
-
-                <p class="mb-1">
-                    <strong>Correo:</strong>
-                    {usuario?.correo || 'No disponible'}
-                </p>
-
-                <p class="mb-3">
-                    <strong>Teléfono:</strong>
-                    {usuario?.telefono || reclamo.contacto}
-                </p>
-
-                <h5 class="text-success">
-                    Información del objeto
-                </h5>
-
-                <p class="mb-1">
-                    <strong>Categoría:</strong>
-                    {objeto?.categoria}
-                </p>
-
-                <p class="mb-1">
-                    <strong>Ubicación:</strong>
-                    {objeto?.ubicacion}
-                </p>
-
-                <p class="mb-3">
-                    <strong>Fecha:</strong>
-                    {formatearFecha(reclamo.fechaSolicitud)}
-                </p>
-
-                <h5 class="text-warning">
-                    Motivo del reclamo
-                </h5>
-
-                <div class="alert alert-light border">
-                    {reclamo.motivo}
-                </div>
-
-                <h5 class="text-secondary">
-                    Descripción proporcionada
-                </h5>
-
-                <div class="alert alert-secondary">
-                    {reclamo.descripcion}
-                </div>
-
-                <div class="d-flex gap-2">
-
-                    <button
-                        class="btn btn-success"
-                        on:click={() => aprobarReclamo(reclamo.id)}
-                    >
-                        Aprobar
-                    </button>
-
-                    <button
-                        class="btn btn-danger"
-                        on:click={() => rechazarReclamo(reclamo.id)}
-                    >
-                        Rechazar
-                    </button>
-
-                </div>
-
+                    src={imagenSeleccionada}
+                    alt="Imagen ampliada"
+                    class="img-fluid rounded">
             </div>
         </div>
     </div>
+{/if}
 
-{/each}
-    {:else}
-        <p class="text-muted text-center">No hay reclamos pendientes.</p>
-    {/if}
-</div>
+<div class="container flex-grow-1 pb-4">
+    <h2 class="text-center text-ues-red fw-bold my-4">
+        Reclamos Pendientes
+        <span class="badge bg-ues-red ms-2">{reclamosPendientes.length}</span>
+    </h2>
 
-<h2 class="text-center text-success my-4">Reclamos Aprobados</h2>
-<div class="row g-4">
-    {#each reclamosAprobados as reclamo}
-        {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
-        {@const objeto = obtenerObjeto(reclamo.idObjeto)}
-        <div class="col-md-4">
-            <div class="card border-success shadow h-100">
-                <div class="card-body">
+    <div class="row g-4">
+        {#each reclamosPendientes as reclamo}
+            {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
+            {@const objeto = obtenerObjeto(reclamo.idObjeto)}
 
-                    <div class="card border-success shadow h-100">
-
-                        {#if objeto?.foto}
+            <div class="col-12 col-lg-6 col-xl-4">
+                <div class="card shadow-sm border-0 rounded-3 h-100 overflow-hidden">
+                    {#if objeto?.foto}
+                        <button
+                            type="button"
+                            class="border-0 bg-transparent p-0 w-100"
+                            on:click={() => imagenSeleccionada = objeto.foto}>
                             <img
                                 src={objeto.foto}
                                 alt={objeto.titulo}
                                 class="card-img-top"
-                                style="height:220px; object-fit:cover;"
+                                style="height: 220px; object-fit: cover; cursor: pointer;"
                             />
-                        {/if}
+                        </button>
+                    {/if}
 
-                        <div class="card-body">
-
-                            <h5 class="fw-bold text-success">
-                                {objeto?.titulo}
-                            </h5>
-
-                            <p class="mb-1">
-                                {usuario?.nombre}
-                            </p>
-
-                            <p class="mb-3 text-muted">
-                                {usuario?.correo}
-                            </p>
-
-                            <div class="alert alert-success">
-                                ✓ Reclamo aprobado
-                            </div>
-
-                            <button
-                                class="btn btn-primary w-100"
-                                on:click={() => entregarReclamo(reclamo.id)}
-                            >
-                                Marcar como entregado
-                            </button>
-
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h4 class="card-title text-ues-red fw-bold mb-0">
+                                {objeto?.titulo || 'Objeto'}
+                            </h4>
+                            <span class="badge bg-warning text-dark">
+                                Pendiente
+                            </span>
                         </div>
 
+                        <hr>
+
+                        <h5 class="text-ues-red fw-bold">Solicitante</h5>
+                        <p class="mb-1"><strong>Nombre:</strong> {usuario?.nombre || 'No disponible'}</p>
+                        <p class="mb-1">
+                            <strong>{usuario?.tipo === 'estudiante' ? 'Carnet' : 'Codigo Institucional'}:</strong>
+                            {usuario?.carnet || usuario?.codigoInstitucional || 'No disponible'}
+                        </p>
+                        <p class="mb-1"><strong>Correo:</strong> {usuario?.correo || 'No disponible'}</p>
+                        <p class="mb-3"><strong>Telefono:</strong> {usuario?.telefono || reclamo.contacto}</p>
+
+                        <h5 class="text-ues-red fw-bold">Informacion del objeto</h5>
+                        <p class="mb-1"><strong>Categoria:</strong> {objeto?.categoria || 'No disponible'}</p>
+                        <p class="mb-1"><strong>Ubicacion:</strong> {objeto?.ubicacion || 'No disponible'}</p>
+                        <p class="mb-3"><strong>Fecha:</strong> {formatearFecha(reclamo.fechaSolicitud)}</p>
+
+                        <h5 class="fw-bold">Motivo del reclamo</h5>
+                        <div class="alert alert-light border mb-3">
+                            {reclamo.motivo}
+                        </div>
+
+                        <h5 class="fw-bold text-muted">Descripcion proporcionada</h5>
+                        <div class="alert alert-secondary flex-grow-1">
+                            {reclamo.descripcion}
+                        </div>
+
+                        <div class="d-grid gap-2 d-sm-flex">
+                            <button
+                                class="btn btn-success fw-semibold flex-fill shadow-sm"
+                                on:click={() => aprobarReclamo(reclamo.id)}
+                            >
+                                Aprobar
+                            </button>
+
+                            <button
+                                class="btn btn-outline-danger fw-semibold flex-fill"
+                                on:click={() => rechazarReclamo(reclamo.id)}
+                            >
+                                Rechazar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    {/each}
-    
-</div>
-
-<h2 class="text-center text-ues-red fw-bold my-4">Reclamos Rechazados</h2>
-<div class="row g-4">
-
-    {#each reclamosRechazados as reclamo}
-
-        {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
-        {@const objeto = obtenerObjeto(reclamo.idObjeto)}
-
-        <div class="col-md-4">
-
-            <div class="card border-danger shadow h-100">
-
-                {#if objeto?.foto}
-                            <img
-                                src={objeto.foto}
-                                alt={objeto.titulo}
-                                class="card-img-top"
-                                style="height:220px; object-fit:cover;"
-                            />
-                {/if}
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        {objeto?.titulo || 'Objeto'}
-                    </h5>
-
-                    <p>
-                        <strong>Solicitante:</strong>
-                        {usuario?.nombre || 'No disponible'}
+        {:else}
+            <div class="col-12">
+                <div class="alert alert-light border text-center shadow-sm py-4 mb-0">
+                    <h5 class="text-ues-red fw-bold mb-2">No hay reclamos pendientes</h5>
+                    <p class="text-muted mb-0">
+                        Cuando un usuario envie un reclamo nuevo, aparecera aqui para aprobarlo o rechazarlo.
                     </p>
-
-                    <p>
-                        <strong>Correo:</strong>
-                        {usuario?.correo || 'No disponible'}
-                    </p>
-
-                    <p>
-                        <strong>
-                            {usuario?.tipo === 'estudiante'
-                                ? 'Carnet'
-                                : 'Código Institucional'}:
-                        </strong>
-
-                        {usuario?.carnet ||
-                         usuario?.codigoInstitucional ||
-                         'No disponible'}
-                    </p>
-
-                    <span class="badge bg-danger">
-                        ✕ Rechazado
-                    </span>
-
                 </div>
-
             </div>
+        {/each}
+    </div>
 
-        </div>
+    <h2 class="text-center text-success fw-bold my-4">
+        Reclamos Aprobados
+        <span class="badge bg-success ms-2">{reclamosAprobados.length}</span>
+    </h2>
 
-    {/each}
+    <div class="row g-4">
+        {#each reclamosAprobados as reclamo}
+            {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
+            {@const objeto = obtenerObjeto(reclamo.idObjeto)}
 
-</div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card border-success shadow-sm rounded-3 h-100 overflow-hidden">
+                    {#if objeto?.foto}
+                        <img src={objeto.foto} alt={objeto.titulo} class="card-img-top" style="height:200px; object-fit:cover;" />
+                    {/if}
 
-<h2 class="text-center text-secondary my-4">
-    Objetos Entregados
-</h2>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h5 class="fw-bold text-success mb-0">{objeto?.titulo || 'Objeto'}</h5>
+                            <span class="badge bg-success">Aprobado</span>
+                        </div>
 
-<div class="row g-4">
+                        <p class="mb-1"><strong>Solicitante:</strong> {usuario?.nombre || 'No disponible'}</p>
+                        <p class="mb-1 text-muted">{usuario?.correo || 'Correo no disponible'}</p>
+                        <p class="mb-3"><strong>Fecha:</strong> {formatearFecha(reclamo.fechaSolicitud)}</p>
 
-    {#each reclamosEntregados as reclamo}
+                        <div class="alert alert-success py-2 mt-auto">
+                            Listo para marcar como entregado.
+                        </div>
 
-        {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
-        {@const objeto = obtenerObjeto(reclamo.idObjeto)}
-
-        <div class="col-md-4">
-
-            <div class="card border-secondary shadow h-100">
-
-                {#if objeto?.foto}
-                    <img
-                        src={objeto.foto}
-                        alt={objeto.titulo}
-                        class="card-img-top"
-                        style="height:220px; object-fit:cover;"
-                    />
-                {/if}
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold">
-                        📦 {objeto?.titulo}
-                    </h5>
-
-                    <p>
-                        👤 {usuario?.nombre}
-                    </p>
-
-                    <span class="badge bg-secondary">
-                        ✓ Entregado
-                    </span>
-
+                        <button
+                            class="btn btn-primary fw-semibold w-100 shadow-sm"
+                            on:click={() => entregarReclamo(reclamo.id)}
+                        >
+                            Marcar como entregado
+                        </button>
+                    </div>
                 </div>
-
             </div>
+        {:else}
+            <div class="col-12">
+                <div class="alert alert-light border text-center shadow-sm py-4 mb-0">
+                    <h5 class="text-success fw-bold mb-2">No hay reclamos aprobados</h5>
+                    <p class="text-muted mb-0">
+                        Los reclamos aprobados apareceran aqui antes de marcar el objeto como entregado.
+                    </p>
+                </div>
+            </div>
+        {/each}
+    </div>
 
-        </div>
+    <h2 class="text-center text-ues-red fw-bold my-4">
+        Reclamos Rechazados
+        <span class="badge bg-danger ms-2">{reclamosRechazados.length}</span>
+    </h2>
 
-    {/each}
+    <div class="row g-4">
+        {#each reclamosRechazados as reclamo}
+            {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
+            {@const objeto = obtenerObjeto(reclamo.idObjeto)}
 
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card border-danger shadow-sm rounded-3 h-100 overflow-hidden">
+                    {#if objeto?.foto}
+                        <img src={objeto.foto} alt={objeto.titulo} class="card-img-top" style="height:200px; object-fit:cover;" />
+                    {/if}
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h5 class="card-title fw-bold mb-0">{objeto?.titulo || 'Objeto'}</h5>
+                            <span class="badge bg-danger">Rechazado</span>
+                        </div>
+
+                        <p class="mb-1"><strong>Solicitante:</strong> {usuario?.nombre || 'No disponible'}</p>
+                        <p class="mb-1"><strong>Correo:</strong> {usuario?.correo || 'No disponible'}</p>
+                        <p class="mb-0">
+                            <strong>{usuario?.tipo === 'estudiante' ? 'Carnet' : 'Codigo Institucional'}:</strong>
+                            {usuario?.carnet || usuario?.codigoInstitucional || 'No disponible'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {:else}
+            <div class="col-12">
+                <div class="alert alert-light border text-center shadow-sm py-4 mb-0">
+                    <h5 class="text-ues-red fw-bold mb-2">No hay reclamos rechazados</h5>
+                    <p class="text-muted mb-0">
+                        Los reclamos rechazados apareceran aqui cuando se deniegue una solicitud.
+                    </p>
+                </div>
+            </div>
+        {/each}
+    </div>
+
+    <h2 class="text-center text-secondary fw-bold my-4">
+        Objetos Entregados
+        <span class="badge bg-secondary ms-2">{reclamosEntregados.length}</span>
+    </h2>
+
+    <div class="row g-4">
+        {#each reclamosEntregados as reclamo}
+            {@const usuario = obtenerUsuario(reclamo.idSolicitante)}
+            {@const objeto = obtenerObjeto(reclamo.idObjeto)}
+
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card border-secondary shadow-sm rounded-3 h-100 overflow-hidden">
+                    {#if objeto?.foto}
+                        <img src={objeto.foto} alt={objeto.titulo} class="card-img-top" style="height:200px; object-fit:cover;" />
+                    {/if}
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h5 class="fw-bold mb-0">{objeto?.titulo || 'Objeto'}</h5>
+                            <span class="badge bg-secondary">Entregado</span>
+                        </div>
+
+                        <p class="mb-1"><strong>Recibido por:</strong> {usuario?.nombre || 'No disponible'}</p>
+                        <p class="mb-0 text-muted">{usuario?.correo || 'Correo no disponible'}</p>
+                    </div>
+                </div>
+            </div>
+        {:else}
+            <div class="col-12">
+                <div class="alert alert-light border text-center shadow-sm py-4 mb-0">
+                    <h5 class="text-secondary fw-bold mb-2">No hay objetos entregados</h5>
+                    <p class="text-muted mb-0">
+                        Cuando un reclamo aprobado se marque como entregado, aparecera en esta seccion.
+                    </p>
+                </div>
+            </div>
+        {/each}
+    </div>
 </div>
 
-</div>
 <footer class="bg-ues-red text-white text-center p-3 mt-auto">
-
     <p class="mb-1">
         © 2026 Encuentra UES-FMO
     </p>
 
     <p class="mb-1">
-        Sistema de Gestión de Objetos Perdidos y Encontrados
+        Sistema de Gestion de Objetos Perdidos y Encontrados
     </p>
 
     <p class="mb-0">
         Universidad de El Salvador - Facultad Multidisciplinaria Oriental
     </p>
-
 </footer>
 
 <style>

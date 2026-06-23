@@ -18,6 +18,7 @@
   let tipoMensaje = 'info';
   let errores = {};
   let usuarioCompleto = null;
+  let idUsuarioSesion = null;
   let fotoPerfil = '';
   let nuevaFotoPerfil = '';
 
@@ -37,20 +38,34 @@
     mensaje = '';
 
     try {
-      if (!$usuarioActual?.id) {
+      const idSesion = obtenerIdUsuarioSesion();
+
+      if (!idSesion && !$usuarioActual?.correo) {
         mensaje = 'No hay una sesion activa.';
         tipoMensaje = 'danger';
         return;
       }
 
       const db = await dbPromise;
-      usuarioCompleto = await db.get('usuarios', $usuarioActual.id);
+      usuarioCompleto = idSesion
+        ? await db.get('usuarios', idSesion)
+        : null;
+
+      if (!usuarioCompleto && $usuarioActual?.correo) {
+        usuarioCompleto = await db.getFromIndex(
+          'usuarios',
+          'correo',
+          normalizarCorreo($usuarioActual.correo)
+        );
+      }
 
       if (!usuarioCompleto) {
         mensaje = 'No se encontro la informacion del usuario.';
         tipoMensaje = 'danger';
         return;
       }
+
+      idUsuarioSesion = usuarioCompleto.id;
 
       datos = {
         nombre: usuarioCompleto.nombre || '',
@@ -59,7 +74,7 @@
         dui: usuarioCompleto.dui || ''
       };
 
-      const fotos = await db.getAllFromIndex('fotos', 'idUsuario', $usuarioActual.id);
+      const fotos = await db.getAllFromIndex('fotos', 'idUsuario', idUsuarioSesion);
       const perfil = fotos.find((foto) => foto.tipo === 'perfil');
       fotoPerfil = perfil?.base64 || '';
       nuevaFotoPerfil = '';
@@ -99,8 +114,12 @@
     return String(dui || '').trim();
   }
 
+  function obtenerIdUsuarioSesion() {
+    return $usuarioActual?.id ?? $usuarioActual?.idUsuario ?? idUsuarioSesion;
+  }
+
   function esUsuarioActual(usuario) {
-    return String(usuario.id) === String($usuarioActual?.id);
+    return String(usuario.id) === String(obtenerIdUsuarioSesion());
   }
 
   async function validarDuplicados(db) {
@@ -172,7 +191,7 @@
       const puedeGuardar = await validarDuplicados(db);
       if (!puedeGuardar) return;
 
-      const usuario = await db.get('usuarios', $usuarioActual.id);
+      const usuario = await db.get('usuarios', obtenerIdUsuarioSesion());
       if (!usuario) {
         mensaje = 'No se encontro el usuario para actualizar.';
         tipoMensaje = 'danger';
@@ -190,7 +209,7 @@
       await db.put('usuarios', usuarioActualizado);
 
       if (nuevaFotoPerfil) {
-        const fotos = await db.getAllFromIndex('fotos', 'idUsuario', $usuarioActual.id);
+        const fotos = await db.getAllFromIndex('fotos', 'idUsuario', obtenerIdUsuarioSesion());
         const fotoExistente = fotos.find((foto) => foto.tipo === 'perfil');
 
         if (fotoExistente) {
@@ -201,7 +220,7 @@
           });
         } else {
           await db.add('fotos', {
-            idUsuario: $usuarioActual.id,
+            idUsuario: obtenerIdUsuarioSesion(),
             tipo: 'perfil',
             base64: nuevaFotoPerfil,
             fechaSubida: new Date().toISOString()
