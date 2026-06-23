@@ -1,43 +1,117 @@
-# Svelte + Vite
+# Encuentra UES
 
-This template should help get you started developing with Svelte in Vite.
+Sistema web para publicar, buscar y reclamar objetos perdidos o encontrados dentro de la UES-FMO. La aplicacion permite registrar usuarios, iniciar sesion, publicar objetos, consultar objetos disponibles, gestionar reclamos, revisar historial y administrar informacion desde un panel interno.
 
-## Recommended IDE Setup
+## Tecnologias utilizadas
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- Svelte 5
+- Vite
+- JavaScript
+- Bootstrap 5
+- IndexedDB con `idb`
+- `face-api.js` para validaciones de imagen
+- `tesseract.js` para lectura OCR
 
-## Need an official Svelte framework?
+## Requisitos
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+Antes de ejecutar el proyecto necesitas tener instalado:
 
-## Technical considerations
+- Node.js
+- npm
 
-**Why use this over SvelteKit?**
+Puedes verificarlo con:
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+node -v
+npm -v
 ```
+
+## Instalacion
+
+Clona o descarga el proyecto y entra a la carpeta:
+
+```bash
+cd Buscar-Encontrar-FMO
+```
+
+Instala las dependencias:
+
+```bash
+npm install
+```
+
+## Ejecutar en modo desarrollo
+
+Para levantar el servidor local de desarrollo:
+
+```bash
+npm run dev
+```
+
+Luego abre en el navegador la URL que muestre la terminal, normalmente:
+
+```text
+http://localhost:5173
+```
+
+## Crear version de produccion
+
+Para generar los archivos finales optimizados:
+
+```bash
+npm run build
+```
+
+Los archivos generados quedaran en la carpeta `dist`.
+
+## Previsualizar la version de produccion
+
+Despues de compilar el proyecto, puedes probar la version generada con:
+
+```bash
+npm run preview
+```
+
+## Estructura general
+
+```text
+Buscar-Encontrar-FMO/
+|-- public/              # Archivos publicos y recursos estaticos
+|-- src/
+|   |-- base_datos/      # Configuracion y manejo de IndexedDB
+|   |-- componentes/     # Componentes reutilizables
+|   |-- crud/            # Funciones para crear, leer, actualizar y eliminar datos
+|   |-- paginas/         # Pantallas principales de la aplicacion
+|   |-- servicios/       # Servicios de imagen, OCR y registro
+|   |-- stores/          # Estados globales de Svelte
+|   |-- App.svelte       # Componente principal y control de vistas
+|   `-- main.js          # Punto de entrada de la aplicacion
+|-- package.json         # Dependencias y scripts del proyecto
+`-- vite.config.js       # Configuracion de Vite
+```
+
+## Funcionalidades principales
+
+- Registro e inicio de sesion de usuarios.
+- Publicacion de objetos encontrados.
+- Busqueda de objetos registrados.
+- Reclamo de objetos por parte de usuarios.
+- Historial de publicaciones y reclamos.
+- Perfil de usuario.
+- Panel de administracion.
+- Validaciones con imagen y OCR para apoyar el registro.
+
+## Scripts disponibles
+
+| Comando | Descripcion |
+| --- | --- |
+| `npm install` | Instala las dependencias del proyecto. |
+| `npm run dev` | Ejecuta la aplicacion en modo desarrollo. |
+| `npm run build` | Genera la version final para produccion. |
+| `npm run preview` | Previsualiza la version compilada. |
+
+## Notas
+
+- La aplicacion usa almacenamiento local del navegador mediante IndexedDB.
+- Algunos servicios de validacion de imagen pueden requerir conexion a internet para cargar modelos externos.
+- Si cambias dependencias, vuelve a ejecutar `npm install`.
