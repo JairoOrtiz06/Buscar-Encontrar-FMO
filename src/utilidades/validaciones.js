@@ -109,6 +109,25 @@ console.log('Carnet normalizado:', carnetTrimmed);
     return { valido: true, error: null };
 }
 
+// validar correo del personas docente y demas administrativos 
+export function validarCorreoPersonal(correo) {
+
+    const regex =
+        /^[a-zA-Z]+(\.[a-zA-Z]+)+@ues\.edu\.sv$/;
+
+    if (!regex.test(correo)) {
+
+        return {
+            valido: false,
+            error: 'Correo institucional inválido'
+        };
+    }
+
+    return {
+        valido: true,
+        error: null
+    };
+}
 
 // Validar teléfono salvadoreño
 // Requisitos:
@@ -383,7 +402,7 @@ export function validarRegistroDocente(datos) {
     const validNombre = validarNombre(datos.nombre);
     if (!validNombre.valido) errores.nombre = validNombre.error;
     
-    const validCorreo = validarCorreo(datos.correo);
+    const validCorreo = validarCorreoPersonal(datos.correo);
     if (!validCorreo.valido) errores.correo = validCorreo.error;
     
     const validTelefono = validarTelefono(datos.telefono);
@@ -420,7 +439,7 @@ export function validarRegistroAdministrativo(datos) {
     const validNombre = validarNombre(datos.nombre);
     if (!validNombre.valido) errores.nombre = validNombre.error;
     
-    const validCorreo = validarCorreo(datos.correo);
+    const validCorreo = validarCorreoPersonal(datos.correo);
     if (!validCorreo.valido) errores.correo = validCorreo.error;
     
     const validTelefono = validarTelefono(datos.telefono);
