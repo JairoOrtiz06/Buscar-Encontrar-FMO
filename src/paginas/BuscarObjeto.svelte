@@ -73,10 +73,10 @@
   }
 </script>
 
-<main class="min-vh-100" style="background-color: #f1f3f5;">
+<main class="min-vh-100 buscar-layout" style="background-color: #f1f3f5;">
   <Navbar paginaActual="buscar" />
 
-  <section class="container py-5">
+  <section class="container py-5 buscar-contenido">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
 
@@ -271,6 +271,21 @@
 {/if}
 
 <style>
+  .buscar-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .buscar-contenido {
+    flex: 1;
+  }
+
+  :global(.inicio-footer) {
+    margin-top: auto;
+  }
+
   .resultados-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
