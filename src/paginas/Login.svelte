@@ -188,27 +188,33 @@
       // Llamar servicio de login
       const resultado = await login(datos.correo, datos.contrasena);
 
-      if (resultado.exito) {
-        // Login exitoso: guardar usuario y token en stores + localStorage
-        establecerUsuarioAutenticado(resultado.usuario, resultado.token);
-        console.log('Login exitoso');
-      if (usuario.estado === 'inactivo') {
-        return {
-            exito: false,
-            mensaje: 'Tu cuenta ha sido desactivada'
-        };
+     if (resultado.exito) {
 
-      if (resultado.exito) {
+    if (
+        resultado.usuario.estado ===
+        'desactivado'
+    ) {
 
-        establecerUsuarioAutenticado(
-            resultado.usuario,
-            resultado.token
+        establecerError(
+            'Tu cuenta ha sido desactivada'
         );
 
+        return;
+    }
+
+    establecerUsuarioAutenticado(
+        resultado.usuario,
+        resultado.token
+    );
+
+    console.log(
+        'Login exitoso'
+    );
+
     irA('inicio');
+
 }
-}
-      } else {
+      else {
         // Login falló: mostrar mensaje de error
         establecerError(resultado.mensaje);
       }
