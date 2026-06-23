@@ -13,13 +13,15 @@
   let usuarioIdActual: string = '';
   let imagenAmpliada: string | null = null;
   let tituloImagenAmpliada: string = '';
+  const correoAdmin = 'ma22013@ues.edu.sv';
   $: usuarioIdActual = String($usuarioActual?.id ?? '');
 
   async function cargarObjetos() {
     const db = await dbPromise;
-    const [objetosGuardados, usuarios] = await Promise.all([
+    const [objetosGuardados, usuarios, reclamos] = await Promise.all([
       db.getAll("objetos"),
-      db.getAll("usuarios")
+      db.getAll("usuarios"),
+      db.getAll("reclamos")
     ]);
 
     const usuariosPorId = new Map(
@@ -30,7 +32,11 @@
       ...objeto,
       publicadoPor: objeto.idUsuario != null
         ? usuariosPorId.get(String(objeto.idUsuario)) || "Usuario no disponible"
-        : "Usuario no disponible"
+        : "Usuario no disponible",
+      tieneReclamoActivo: reclamos.some((reclamo) =>
+        String(reclamo.idObjeto) === String(objeto.id) &&
+        ['pendiente', 'aprobado'].includes(reclamo.estado)
+      )
     }));
 
     console.log("OBJETOS CARGADOS:", objetos);
@@ -198,13 +204,22 @@
                   </div>
 
                   <div class="card-footer bg-white border-0 px-4 pb-4 pt-0">
+                    {#if objeto.tieneReclamoActivo}
+                      <div class="alert alert-warning reclamo-activo mb-3">
+                        Este objeto ya tiene un reclamo en revision. Si crees que te pertenece, contacta con administracion:
+                        <strong>{correoAdmin}</strong>
+                      </div>
+                    {/if}
+
                     <button
                       class="btn text-white fw-bold w-100"
                       style="background-color: #990c14;"
                       on:click={() => reclamarObjeto(objeto)}
-                      disabled={objeto.idUsuario != null && String(objeto.idUsuario) === String($usuarioActual?.id)}
+                      disabled={objeto.tieneReclamoActivo || (objeto.idUsuario != null && String(objeto.idUsuario) === String($usuarioActual?.id))}
                     >
-                      {objeto.idUsuario != null && String(objeto.idUsuario) === String($usuarioActual?.id)
+                      {objeto.tieneReclamoActivo
+                        ? 'Reclamo en revision'
+                        : objeto.idUsuario != null && String(objeto.idUsuario) === String($usuarioActual?.id)
                         ? 'No puedes reclamar tu propio objeto'
                         : 'Reclamar objeto'}
                     </button>
@@ -297,6 +312,14 @@
     grid-template-columns: 120px minmax(0, 1fr);
     gap: 0.35rem;
     align-items: start;
+  }
+
+  .reclamo-activo {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 0.86rem;
+    line-height: 1.35;
   }
 
   .imagen-modal {

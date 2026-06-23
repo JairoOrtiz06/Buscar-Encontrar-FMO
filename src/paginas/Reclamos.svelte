@@ -46,6 +46,7 @@
     let contactoError = "";
     let misReclamos: any[] = [];
     let cargandoReclamos = true;
+    const correoAdmin = 'ma22013@ues.edu.sv';
     $: formularioIncompleto = !motivo.trim() || !descripcion.trim() || !contacto.trim();
 
     onMount(async () => {
@@ -170,6 +171,16 @@
         try {
             const db = await dbPromise;
             const reclamos = await db.getAll('reclamos');
+            const reclamoActivoDelObjeto = reclamos.find((reclamo) =>
+                reclamo.idObjeto === objeto?.id &&
+                ['pendiente', 'aprobado'].includes(reclamo.estado)
+            );
+
+            if (reclamoActivoDelObjeto) {
+                alert(`Este objeto ya tiene un reclamo en revision. Si crees que te pertenece, contacta con administracion: ${correoAdmin}`);
+                return;
+            }
+
             const reclamoExistente = reclamos.find((reclamo) =>
                 reclamo.idObjeto === objeto?.id &&
                 String(reclamo.idSolicitante) === usuarioIdActual &&
