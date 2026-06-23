@@ -10,6 +10,7 @@
     import {
     validarTelefono
 } from '../utilidades/validaciones.js';
+    import { enviarNotificacion } from '../servicios/notificacionesService.js';
 
     // variables 
     let pestaña = "usuarios";
@@ -93,6 +94,14 @@
             'usuarios',
             usuario
         );
+
+        await enviarNotificacion({
+            idUsuario: usuario.id,
+            titulo: 'Cuenta aprobada',
+            mensaje: 'Tu cuenta fue aprobada. Ya puedes usar el sistema.',
+            tipo: 'cuenta-aprobada',
+            referencia: { idUsuario: usuario.id }
+        });
 
         await cargarUsuarios();
 

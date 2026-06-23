@@ -50,7 +50,7 @@ function crearIndiceSiNoExiste(store, nombre, keyPath, opciones = { unique: fals
     }
 }
 
-export const dbPromise = openDB('encuentraUES', 2, {
+export const dbPromise = openDB('encuentraUES', 3, {
     upgrade(db, oldVersion, newVersion, transaction) {
 
         //USUARIOS
@@ -116,6 +116,16 @@ export const dbPromise = openDB('encuentraUES', 2, {
             store.createIndex('idObjeto', 'idObjeto', { unique: false });
             store.createIndex('idReclamo', 'idReclamo', { unique: false });
             store.createIndex('fechaEntrega', 'fechaEntrega', { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains('notificaciones')) {
+            const store = db.createObjectStore('notificaciones', {
+                keyPath: 'id',
+                autoIncrement: true
+            });
+            store.createIndex('idUsuario', 'idUsuario', { unique: false });
+            store.createIndex('leida', 'leida', { unique: false });
+            store.createIndex('fechaCreacion', 'fechaCreacion', { unique: false });
         }
 
     }

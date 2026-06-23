@@ -4,6 +4,7 @@
   import Footer from '../componentes/Footer.svelte';
   import { usuarioActual } from '../stores/authStore.js';
   import { irA } from '../stores/navegacionStore.js';
+  import { enviarNotificacionAdmins } from '../servicios/notificacionesService.js';
 
   const categorias = [
     { valor: 'carnet', label: 'Carnet' },
@@ -113,7 +114,14 @@
         idUsuario: $usuarioActual.id
       };
 
-      await crearObjeto(objeto);
+      const idObjeto = await crearObjeto(objeto);
+
+      await enviarNotificacionAdmins({
+        titulo: 'Objeto publicado',
+        mensaje: `${$usuarioActual?.nombre || 'Un usuario'} publico el objeto "${objeto.titulo}".`,
+        tipo: 'objeto-publicado',
+        referencia: { idObjeto, idUsuario: $usuarioActual.id }
+      });
 
       mensaje = 'Objeto publicado correctamente';
 

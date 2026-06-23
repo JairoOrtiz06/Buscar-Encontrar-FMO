@@ -3,6 +3,7 @@
   import { irA } from '../stores/navegacionStore.js';
   import { onMount } from 'svelte';
   import { dbPromise } from '../base_datos/database.js';
+  import NotificacionesPanel from './NotificacionesPanel.svelte';
 
 
   export let paginaActual = 'inicio';
@@ -82,6 +83,7 @@ $: if ($usuarioActual?.fotoPerfil) {
             {enlace.label}
           </button>
         {/each}
+        <NotificacionesPanel />
         <button
           type="button"
           class="logout-btn"

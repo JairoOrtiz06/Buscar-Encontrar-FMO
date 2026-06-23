@@ -1,6 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { dbPromise } from '../base_datos/database.js';
+    import {
+        enviarNotificacion,
+        enviarNotificacionAdmins
+    } from '../servicios/notificacionesService.js';
 
     let notificacion = "";
     let reclamosPendientes: any[] = [];
@@ -54,6 +58,18 @@
         }
 
         await tx.done;
+
+        await enviarNotificacion({
+            idUsuario: reclamo.idSolicitante,
+            titulo: 'Reclamo aprobado',
+            mensaje: `Tu reclamo del objeto "${objeto?.titulo || 'Objeto'}" fue aprobado.`,
+            tipo: 'reclamo-aprobado',
+            referencia: {
+                idReclamo: reclamo.id,
+                idObjeto: reclamo.idObjeto
+            }
+        });
+
         await cargarReclamos();
         mostrarNotificacion("Reclamo aprobado");
     }
@@ -102,6 +118,43 @@
         });
 
         await tx.done;
+
+        const tituloObjeto = objeto?.titulo || 'Objeto';
+
+        await Promise.all([
+            enviarNotificacion({
+                idUsuario: reclamo.idSolicitante,
+                titulo: 'Objeto entregado',
+                mensaje: `El objeto "${tituloObjeto}" fue marcado como entregado.`,
+                tipo: 'objeto-entregado',
+                referencia: {
+                    idReclamo: reclamo.id,
+                    idObjeto: reclamo.idObjeto
+                }
+            }),
+            objeto?.idUsuario != null
+                ? enviarNotificacion({
+                    idUsuario: objeto.idUsuario,
+                    titulo: 'Objeto entregado',
+                    mensaje: `Tu publicacion "${tituloObjeto}" fue marcada como entregada.`,
+                    tipo: 'objeto-entregado',
+                    referencia: {
+                        idReclamo: reclamo.id,
+                        idObjeto: reclamo.idObjeto
+                    }
+                })
+                : Promise.resolve(),
+            enviarNotificacionAdmins({
+                titulo: 'Objeto entregado',
+                mensaje: `El objeto "${tituloObjeto}" fue marcado como entregado.`,
+                tipo: 'objeto-entregado',
+                referencia: {
+                    idReclamo: reclamo.id,
+                    idObjeto: reclamo.idObjeto
+                }
+            })
+        ]);
+
         await cargarReclamos();
         mostrarNotificacion("Objeto entregado correctamente");
     }

@@ -87,6 +87,7 @@ export function validarCorreo(correo) {
  * Ejemplo: carnet MA22013 → correo debe ser ma22013@ues.edu.sv
  */
 export function validarCorreoEstudiante(correo, carnet) {
+    return validarCorreo(correo);
     if (!carnet || !correo) {
         return { valido: false, error: 'Correo requerido' };
     }

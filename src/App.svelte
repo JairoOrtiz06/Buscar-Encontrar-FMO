@@ -1,10 +1,11 @@
-<script lang="ts">
+<script>
   // ========================================
   // IMPORTACIONES
   // ========================================
   
   import { onMount } from 'svelte';
   import { paginaActual } from './stores/navegacionStore.js';
+  import { crearAdminPorDefecto } from './base_datos/database.js';
   
   // Componentes de páginas
   import Login from './paginas/Login.svelte';
@@ -30,11 +31,9 @@
   
   // Se ejecuta cuando la app monta en el DOM
   // Restaura la sesión si el usuario recarga la página
-  import { crearAdminPorDefecto } from './base_datos/database.js';
+  let objetoSeleccionado = null;
 
-  let objetoSeleccionado: any = null;
-
-  function reclamarObjeto(objeto: any) {
+  function reclamarObjeto(objeto) {
     console.log("Objeto seleccionado para reclamar:", objeto);
     objetoSeleccionado = objeto;
     paginaActual.set('reclamos');

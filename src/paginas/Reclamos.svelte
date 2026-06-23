@@ -4,6 +4,7 @@
     import { usuarioActual } from '../stores/authStore.js';
     import Navbar from '../componentes/Navbar.svelte';
     import Footer from '../componentes/Footer.svelte';
+    import { enviarNotificacionAdmins } from '../servicios/notificacionesService.js';
 
     type ObjetoReclamable = {
         id: number | null;
@@ -192,7 +193,7 @@
                 return;
             }
 
-            await db.add('reclamos', {
+            const idReclamo = await db.add('reclamos', {
                 idObjeto: objeto.id,
                 idSolicitante: $usuarioActual.id,
                 motivo: motivo.trim(),
@@ -200,6 +201,17 @@
                 contacto: contacto.trim(),
                 estado: 'pendiente',
                 fechaSolicitud: new Date().toISOString()
+            });
+
+            await enviarNotificacionAdmins({
+                titulo: 'Nuevo reclamo recibido',
+                mensaje: `${$usuarioActual?.nombre || 'Un usuario'} hizo un reclamo sobre "${objeto.titulo}".`,
+                tipo: 'reclamo-nuevo',
+                referencia: {
+                    idReclamo,
+                    idObjeto: objeto.id,
+                    idSolicitante: $usuarioActual.id
+                }
             });
 
             alert("Reclamo enviado correctamente");
@@ -506,6 +518,5 @@
 
   <Footer />
 </main>
-
 
 

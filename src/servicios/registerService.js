@@ -14,6 +14,7 @@
  */
 
 import { dbPromise } from '../base_datos/database.js';
+import { enviarNotificacionAdmins } from './notificacionesService.js';
 
 
 /**
@@ -403,6 +404,13 @@ export async function registrarUsuario(datos, fotoPerfil = null, fotoCarnet = nu
 
         const db = await dbPromise;
         const idUsuario = await db.add('usuarios', nuevoUsuario);
+
+        await enviarNotificacionAdmins({
+            titulo: 'Nueva cuenta por revisar',
+            mensaje: `${nuevoUsuario.nombre} creo una cuenta y esta pendiente de aprobacion.`,
+            tipo: 'usuario-pendiente',
+            referencia: { idUsuario, tipo: nuevoUsuario.tipo }
+        });
 
         // Guardar fotos en la tabla 'fotos'
         if (fotoPerfil) {

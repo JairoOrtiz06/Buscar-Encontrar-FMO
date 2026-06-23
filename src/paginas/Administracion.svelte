@@ -3,6 +3,7 @@
     import ObjetosAdmin from "./ObjetosAdmin.svelte";
     import ReclamosAdmin from "./ReclamosAdmin.svelte";
     import EstadisticasAdmin from './EstadisticasAdmin.svelte';
+    import NotificacionesPanel from '../componentes/NotificacionesPanel.svelte';
 
     import { logout } from '../stores/authStore.js';
     import { irA } from '../stores/navegacionStore.js';
@@ -49,11 +50,15 @@
                 </button>
             </div>
 
-            <button
-                class="btn btn-sm btn-light text-ues-red fw-bold px-3"
-                on:click={cerrarSesion}>
-                Cerrar sesion
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <NotificacionesPanel modo="admin" />
+
+                <button
+                    class="btn btn-sm btn-light text-ues-red fw-bold px-3"
+                    on:click={cerrarSesion}>
+                    Cerrar sesion
+                </button>
+            </div>
         </div>
     </div>
 
