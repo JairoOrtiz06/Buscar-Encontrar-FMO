@@ -1,7 +1,5 @@
 /**
- * SERVICIO DE IMÁGENES
- * Archivo: src/servicios/imageService.js
- * 
+ 
  * Maneja validación y detección de rostros en imágenes
  * Usa face-api.js para detectar si hay un rostro real
  */

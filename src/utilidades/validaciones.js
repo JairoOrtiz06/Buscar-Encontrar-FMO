@@ -1,28 +1,3 @@
-// validaciones para "REGISTRO USUARIO"
-
-/**
- * VALIDACIONES - validaciones.js
- * 
- * SOLUCIÓN DEL PROBLEMA (Rúbrica #1):
- * Valida todos los datos de entrada ANTES de guardarlos en IndexedDB.
- * Evita datos inválidos, duplicados o incompletos en la base de datos.
- * 
- * ARQUITECTURA (Rúbrica #2 y #3):
- * - Funciones JS puras y sin efectos secundarios
- * - Cada validador retorna { valido, error }
- * - Reutilizables en múltiples componentes (Login, Registro)
- * - Validaciones en tiempo real mientras el usuario escribe
- * 
- * USABILIDAD (Rúbrica #5):
- * - Mensajes de error claros en español
- * - Indicador visual de fortaleza de contraseña
- * - Validaciones progresivas (fail-fast)
- */
-
-// ============================================================
-// 1. VALIDADORES INDIVIDUALES
-// ============================================================
-
 // Validar nombre de usuario
 // Requisitos:
 // - No está vacío

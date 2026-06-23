@@ -1,17 +1,3 @@
-/**
- * SERVICIO DE REGISTRO - registerService.js
- * 
- * SOLUCIÓN DEL PROBLEMA (Rúbrica #1):
- * Sistema de objetos perdidos y encontrados para UES-FMO.
- * Este servicio permite que nuevos usuarios se registren en el sistema.
- * Valida que sean miembros reales de la universidad (carnet, DUI, código institucional).
- * 
- * ARQUITECTURA (Rúbrica #3 y #4):
- * - Operaciones CRUD completas para usuarios
- * - Índices en IndexedDB para búsquedas rápidas (correo, DUI)
- * - Manejo perfecto de promesas asíncronas
- * - Validaciones en tiempo real antes de guardar
- */
 
 import { dbPromise } from '../base_datos/database.js';
 import { enviarNotificacionAdmins } from './notificacionesService.js';

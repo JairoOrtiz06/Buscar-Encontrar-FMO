@@ -1,20 +1,4 @@
-/**
- * ALMACÉN DE AUTENTICACIÓN - authStore.js
- * 
- * SOLUCIÓN DEL PROBLEMA (Rúbrica #1):
- * Gestiona el estado global de autenticación en toda la aplicación.
- * Permite que cualquier componente sepa si hay un usuario logueado y sus datos.
- * 
- * ARQUITECTURA (Rúbrica #3):
- * - Usa Svelte Stores (writable y derived) para reactividad perfecta
- * - Estado global accesible desde cualquier componente
- * - Sincronización automática entre componentes
- * 
- * PERSISTENCIA (Rúbrica #4):
- * - Guarda sesión en localStorage para persistencia entre recargas
- * - Verifica sesión en BD al iniciar la app
- * - Manejo perfecto de promesas asíncronas
- */
+
 
 import { writable, derived } from 'svelte/store';
 import { verificarSesion } from '../servicios/authService.js';

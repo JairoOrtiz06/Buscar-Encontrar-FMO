@@ -1,40 +1,6 @@
-<!--
-  COMPONENTE REGISTRO
-  Archivo: src/paginas/Registro.svelte
-  
-  SOLUCIÓN DEL PROBLEMA (Rúbrica #1):
-  Permite que nuevos usuarios se registren en el sistema.
-  Valida que sean miembros reales de UES-FMO (carnet, DUI, código institucional).
-  
-  ARQUITECTURA SVELTE (Rúbrica #3):
-  - Componente monolítico con 2 pasos
-  - Estado reactivo para pasos y categoría seleccionada
-  - Formulario dinámico basado en tipo de usuario
-  - Integración perfecta con stores y servicios
-  
-  HTML SEMÁNTICO (Rúbrica #2):
-  - Form para formularios
-  - Input con type correctos
-  - Fieldset para agrupar campos relacionados
-  - Labels para accesibilidad
-  
-  VALIDACIÓN (Rúbrica #5):
-  - Validación en tiempo real (onBlur)
-  - Indicador visual de errores
-  - Indicador de fortaleza de contraseña
-  - Prevención de envío si hay errores
-  
-  PERSISTENCIA (Rúbrica #4):
-  - Integración con registerService.js
-  - Guardado en IndexedDB con validaciones
-  - Manejo perfecto de promesas
--->
 
 <script>
-  // ========================================
-  // IMPORTACIONES
-  // ========================================
-  
+ 
   // Importar logo
   import logoUES from '../assets/logoUES.png';
 
